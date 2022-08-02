@@ -1,0 +1,9 @@
+[0m[[0m[31merror[0m] [0m[0m/Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/src/main/scala/insert/RenderInsert.scala:32:7: class RenderInsert needs to be abstract. Missing implementation for:[0m
+[0m[[0m[31merror[0m] [0m[0m  def render(params: P): kuzminki.render.RenderedOperation // inherited from trait RunOperationParams[0m
+[0m[[0m[31merror[0m] [0m[0mclass RenderInsert[P]([0m
+[0m[[0m[31merror[0m] [0m[0m      ^[0m
+[0m[[0m[31merror[0m] [0m[0m/Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/src/main/scala/insert/RenderInsert.scala:58:7: class RenderInsertReturning needs to be abstract. Missing implementation for:[0m
+[0m[[0m[31merror[0m] [0m[0m  def render(params: P): kuzminki.render.RenderedQuery[R] // inherited from trait RunQueryParams[0m
+[0m[[0m[31merror[0m] [0m[0mclass RenderInsertReturning[P, R]([0m
+[0m[[0m[31merror[0m] [0m[0m      ^[0m
+[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m

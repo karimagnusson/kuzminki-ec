@@ -60,7 +60,7 @@ object ExampleApp extends zio.App {
     }
   } yield ()
 
-  val dbConfig = DDbConfig.forDb("company").getConfig
+  val dbConfig = DbConfig.forDb("company").getConfig
   val dbLayer = Kuzminki.layer(dbConfig)
 
   override def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] = {

@@ -129,6 +129,10 @@ class JdbcExecutor(pool: HikariDataSource, dbContext: ExecutionContext) {
       num
     } (dbContext)
   }
+
+  def close(): Unit = {
+    pool.close()
+  }
 }
 
 

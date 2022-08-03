@@ -17,52 +17,47 @@
 package kuzminki.api
 
 import java.util.Properties
+import scala.collection.mutable.Map
+import scala.deprecated
 
-
-case class DbConfig(url: String, props: Properties, poolSize: Int)
 
 object DbConfig {
-  def forDb(dbName: String) = new DbConfigBuilder(dbName)
+  def forDb(db: String) = new DbConfig(db)
 }
 
-class DbConfigBuilder(dbName: String) {
 
-  private var poolSize = 10
+class DbConfig(val db: String) {
 
-  private var hostOpt: Option[String] = None
+  var dispatcher = "kuzminki-dispatcher"
 
-  private var portOpt: Option[String] = None
+  val props = new Properties()
+  props.setProperty("dataSourceClassName", "org.postgresql.ds.PGSimpleDataSource")
+  props.setProperty("dataSource.databaseName", db)
+  props.setProperty("dataSource.serverName", "localhost")
+  props.setProperty("dataSource.portNumber", "5432")
 
-  private val props = new Properties()
-
-  private def getUrl = {
-    val host = hostOpt.getOrElse("localhost")
-    val port = portOpt.getOrElse("5432")
-    s"jdbc:postgresql://$host:$port/$dbName"
-  }
-
-  def withPoolSize(value: Int) = {
-    poolSize = value
-    this
-  }
-
-  def withHost(value: String) = {
-    hostOpt = Some(value)
-    this
-  }
-
-  def withPort(value: String) = {
-    portOpt = Some(value)
+  def withDispatcher(value: String) = {
+    dispatcher = value
     this
   }
 
   def withUser(value: String) = {
-    props.setProperty("user", value)
+    props.setProperty("dataSource.user", value)
     this
   }
 
   def withPassword(value: String) = {
-    props.setProperty("password", value)
+    props.setProperty("dataSource.password", value)
+    this
+  }
+
+  def withHost(value: String) = {
+    props.setProperty("dataSource.serverName", value)
+    this
+  }
+
+  def withPort(value: String) = {
+    props.setProperty("dataSource.portNumber", value)
     this
   }
 
@@ -74,10 +69,9 @@ class DbConfigBuilder(dbName: String) {
     this
   }
 
-  def getConfig = DbConfig(getUrl, props, poolSize)
+  @deprecated("Not used", "01-08-2022")
+  def getConfig = this
 }
-
-
 
 
 

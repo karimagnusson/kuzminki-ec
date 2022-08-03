@@ -18,7 +18,6 @@ package kuzminki.api
 
 import java.util.Properties
 import scala.concurrent.{Future, ExecutionContext}
-import com.typesafe.config.{Config, ConfigFactory}
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 
 import kuzminki.api._
@@ -36,26 +35,11 @@ object Kuzminki {
 
   Class.forName("org.postgresql.Driver")
 
-  private def createPool(conf: Config): HikariDataSource = {
-    val props = new Properties()
-    props.setProperty("dataSourceClassName", "org.postgresql.ds.PGSimpleDataSource")
-    props.setProperty("dataSource.user", conf.getString("user"))
-    props.setProperty("dataSource.password", conf.getString("password"))
-    props.setProperty("dataSource.databaseName", conf.getString("db"))
-    props.setProperty("dataSource.serverName", conf.getString("host"))
-    props.setProperty("dataSource.portNumber", conf.getString("port"))
-    new HikariDataSource(new HikariConfig(props))
-  }
+  def create(conf: DbConfig)(implicit system: ActorSystem): Kuzminki =
+    new DefaultApi(conf, system)
 
-  def forConfig(system: ActorSystem, confName: String, dispatcherName: String): Kuzminki = {
-    val baseConf = ConfigFactory.load()
-    val conf = baseConf.getConfig(confName)
-    val pool = createPool(conf)
-    new DefaultApi(pool, system, dispatcherName)
-  }
-
-  def create(system: ActorSystem): Kuzminki =
-    forConfig(system, "kuzminki", "akka.actor.kuzminki-dispatcher")
+  def createSplit(getConf: DbConfig, setConf: DbConfig)(implicit system: ActorSystem): Kuzminki =
+    new SplitApi(getConf, setConf, system)
 }
 
 
@@ -81,41 +65,91 @@ trait Kuzminki {
 }
 
 
-private class DefaultApi(pool: HikariDataSource, system: ActorSystem, dispatcherName: String) extends Kuzminki {
+private class DefaultApi(conf: DbConfig, system: ActorSystem) extends Kuzminki {
 
   implicit val ec = system.dispatchers.defaultGlobalDispatcher
 
-  val jdbc = new JdbcExecutor(pool, system.dispatchers.lookup(dispatcherName))
+  val pool = new JdbcExecutor(
+    new HikariDataSource(new HikariConfig(conf.props)),
+    system.dispatchers.lookup(conf.dispatcher)
+  )
 
   def query[R](render: => RenderedQuery[R]): Future[List[R]] =
-    jdbc.query(render)
+    pool.query(render)
 
   def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): Future[List[T]] = 
-    jdbc.query(render).map(_.map(transform))
+    pool.query(render).map(_.map(transform))
 
   def queryHead[R](render: => RenderedQuery[R]): Future[R] =
-    jdbc.query(render).map(_.head)
+    pool.query(render).map(_.head)
 
   def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): Future[T] =
-    jdbc.query(render).map(_.head).map(transform)
+    pool.query(render).map(_.head).map(transform)
 
   def queryHeadOpt[R](render: => RenderedQuery[R]): Future[Option[R]] =
-    jdbc.query(render).map(_.headOption)
+    pool.query(render).map(_.headOption)
 
   def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): Future[Option[T]] =
-    jdbc.query(render).map(_.headOption.map(transform))
+    pool.query(render).map(_.headOption.map(transform))
 
   def exec(render: => RenderedOperation): Future[Unit] =
-    jdbc.exec(render)
+    pool.exec(render)
 
   def execNum(render: => RenderedOperation): Future[Int] =
-    jdbc.execNum(render)
+    pool.execNum(render)
 
   def close: Future[Unit] = {
     pool.close()
     Future.successful(())
   }
 }
+
+
+private class SplitApi(getConf: DbConfig, setConf: DbConfig, system: ActorSystem) extends Kuzminki {
+
+  implicit val ec = system.dispatchers.defaultGlobalDispatcher
+
+  val getPool = new JdbcExecutor(
+    new HikariDataSource(new HikariConfig(getConf.props)),
+    system.dispatchers.lookup(getConf.dispatcher)
+  )
+
+  val setPool = new JdbcExecutor(
+    new HikariDataSource(new HikariConfig(setConf.props)),
+    system.dispatchers.lookup(setConf.dispatcher)
+  )
+
+  def query[R](render: => RenderedQuery[R]): Future[List[R]] =
+    getPool.query(render)
+
+  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): Future[List[T]] = 
+    getPool.query(render).map(_.map(transform))
+
+  def queryHead[R](render: => RenderedQuery[R]): Future[R] =
+    getPool.query(render).map(_.head)
+
+  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T): Future[T] =
+    getPool.query(render).map(_.head).map(transform)
+
+  def queryHeadOpt[R](render: => RenderedQuery[R]): Future[Option[R]] =
+    getPool.query(render).map(_.headOption)
+
+  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T): Future[Option[T]] =
+    getPool.query(render).map(_.headOption.map(transform))
+
+  def exec(render: => RenderedOperation): Future[Unit] =
+    setPool.exec(render)
+
+  def execNum(render: => RenderedOperation): Future[Int] =
+    setPool.execNum(render)
+
+  def close: Future[Unit] = {
+    getPool.close()
+    setPool.close()
+    Future.successful(())
+  }
+}
+
 
 
 

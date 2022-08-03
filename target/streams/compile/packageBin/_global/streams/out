@@ -1094,6 +1094,8 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/target/classes/kuzminki/api/package$RawSQL$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	kuzminki/api/Model.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/target/classes/kuzminki/api/Model.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	kuzminki/api/SplitApi.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/target/classes/kuzminki/api/SplitApi.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	kuzminki/api/DefaultApi.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/target/classes/kuzminki/api/DefaultApi.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	kuzminki/api/Model$.class[0m
@@ -1120,8 +1122,6 @@
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/target/classes/kuzminki/api/sql.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	kuzminki/api/Join$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/target/classes/kuzminki/api/Join$.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	kuzminki/api/DbConfigBuilder.class[0m
-[0m[[0m[0mdebug[0m] [0m[0m	  /Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/target/classes/kuzminki/api/DbConfigBuilder.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	kuzminki/api/DbConfig$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	  /Users/karimagnusson/Jobs/Kuzminki/kuzminki-akka/target/classes/kuzminki/api/DbConfig$.class[0m
 [0m[[0m[0mdebug[0m] [0m[0m	kuzminki/fn[0m

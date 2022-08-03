@@ -17,8 +17,9 @@
 package kuzminki.api
 
 import java.util.Properties
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.Future
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+import akka.actor._
 
 import kuzminki.api._
 import kuzminki.jdbc.JdbcExecutor
@@ -26,9 +27,6 @@ import kuzminki.render.{
   RenderedQuery,
   RenderedOperation
 }
-
-import akka.actor._
-import akka.Done
 
 
 object Kuzminki {
@@ -98,7 +96,7 @@ private class DefaultApi(conf: DbConfig, system: ActorSystem) extends Kuzminki {
   def execNum(render: => RenderedOperation): Future[Int] =
     pool.execNum(render)
 
-  def close: Future[Unit] = {
+  def close(): Future[Unit] = {
     pool.close()
     Future.successful(())
   }
@@ -143,7 +141,7 @@ private class SplitApi(getConf: DbConfig, setConf: DbConfig, system: ActorSystem
   def execNum(render: => RenderedOperation): Future[Int] =
     setPool.execNum(render)
 
-  def close: Future[Unit] = {
+  def close(): Future[Unit] = {
     getPool.close()
     setPool.close()
     Future.successful(())

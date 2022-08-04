@@ -18,21 +18,15 @@ package kuzminki.jdbc
 
 import java.util.Properties
 import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.SQLException
 import java.sql.{Statement, PreparedStatement}
 import java.sql.ResultSet
 import java.sql.Time
 import java.sql.Date
 import java.sql.Timestamp
-import com.zaxxer.hikari.HikariDataSource
 
 import scala.concurrent.{Future, ExecutionContext}
-import scala.concurrent.duration._
-import scala.reflect.runtime.universe._
-import scala.util.{Try, Success, Failure}
-import scala.reflect.{classTag, ClassTag}
 import scala.collection.mutable.ListBuffer
+import com.zaxxer.hikari.HikariDataSource
 
 import kuzminki.api.{DbConfig, KuzminkiError}
 import kuzminki.shape.RowConv
@@ -130,7 +124,7 @@ class JdbcExecutor(pool: HikariDataSource, dbContext: ExecutionContext) {
     } (dbContext)
   }
 
-  def close(): Unit = {
+  def close: Unit = {
     pool.close()
   }
 }

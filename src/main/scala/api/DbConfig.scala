@@ -17,7 +17,6 @@
 package kuzminki.api
 
 import java.util.Properties
-import scala.collection.mutable.Map
 import scala.deprecated
 
 

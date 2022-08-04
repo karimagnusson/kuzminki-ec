@@ -1,11 +1,11 @@
 [![license](https://img.shields.io/github/license/rdbc-io/rdbc.svg?style=flat-square)](https://github.com/rdbc-io/rdbc/blob/master/LICENSE)
-# kuzminki-zio
+# kuzminki-akka
 
 Kuzminki-akka is query builder and access library for PostgreSQL written in Scala.
 
 If you have any questions about the project feel free to post on Gitter or contact me directly on telegram @karimagnusson.
 
-This library is also available for ZIO [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)
+This library is also available for [ZIO](https://zio.dev/) [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)
 
 See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
@@ -21,7 +21,7 @@ import akka.util.Timeout
 import scala.concurrent.Await
 import kuzminki.api._
 
-object ExampleApp extends zio.App {
+object ExampleApp extends App {
 
   class Client extends Model("client") {
     val id = column[Int]("id")

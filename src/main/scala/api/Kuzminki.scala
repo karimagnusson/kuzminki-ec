@@ -96,8 +96,8 @@ private class DefaultApi(conf: DbConfig, system: ActorSystem) extends Kuzminki {
   def execNum(render: => RenderedOperation): Future[Int] =
     pool.execNum(render)
 
-  def close(): Future[Unit] = {
-    pool.close()
+  def close: Future[Unit] = {
+    pool.close
     Future.successful(())
   }
 }
@@ -141,9 +141,9 @@ private class SplitApi(getConf: DbConfig, setConf: DbConfig, system: ActorSystem
   def execNum(render: => RenderedOperation): Future[Int] =
     setPool.execNum(render)
 
-  def close(): Future[Unit] = {
-    getPool.close()
-    setPool.close()
+  def close: Future[Unit] = {
+    getPool.close
+    setPool.close
     Future.successful(())
   }
 }

@@ -2,7 +2,7 @@ scalaVersion := "2.13.8"
 
 name := "kuzminki-akka"
 
-version := "0.9.2-test"
+version := "0.9.3"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -17,7 +17,6 @@ lazy val root = (project in file("."))
       "com.typesafe.akka" %% "akka-actor" % "2.6.19",
       "org.postgresql" % "postgresql" % "42.2.24",
       "com.zaxxer" % "HikariCP" % "4.0.3"
-      //"dev.zio" %% "zio" % "1.0.12"
     )
   )
 

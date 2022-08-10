@@ -91,7 +91,7 @@ class JdbcExecutor(pool: HikariDataSource, dbContext: ExecutionContext) {
 
   def query[R](stm: RenderedQuery[R]): Future[List[R]] = {
     Future {
-      val conn = pool.getConnection
+      val conn = pool.getConnection()
       val jdbcStm = getStatement(conn, stm.statement, stm.args)
       val jdbcResultSet = jdbcStm.executeQuery()
       var buff = ListBuffer.empty[R]
@@ -100,26 +100,29 @@ class JdbcExecutor(pool: HikariDataSource, dbContext: ExecutionContext) {
       }
       jdbcResultSet.close()
       jdbcStm.close()
+      conn.close()
       buff.toList
     } (dbContext)
   }
 
   def exec(stm: RenderedOperation): Future[Unit] = {
     Future {
-      val conn = pool.getConnection
+      val conn = pool.getConnection()
       val jdbcStm = getStatement(conn, stm.statement, stm.args)
       jdbcStm.execute()
       jdbcStm.close()
+      conn.close()
       ()
     } (dbContext)
   }
 
   def execNum(stm: RenderedOperation): Future[Int] = {
     Future {
-      val conn = pool.getConnection
+      val conn = pool.getConnection()
       val jdbcStm = getStatement(conn, stm.statement, stm.args)
       val num = jdbcStm.executeUpdate()
       jdbcStm.close()
+      conn.close()
       num
     } (dbContext)
   }

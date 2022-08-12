@@ -51,11 +51,20 @@ trait RunQueryParams[P, R] {
   def run(params: P)(implicit db: Kuzminki): Future[List[R]] =
     db.query(render(params))
 
+  def runAs[T](params: P)(implicit transform: R => T, db: Kuzminki): Future[List[T]] =
+    db.queryAs(render(params), transform)
+
   def runHead(params: P)(implicit db: Kuzminki): Future[R] =
     db.queryHead(render(params))
 
+  def runHeadAs[T](params: P)(implicit transform: R => T, db: Kuzminki): Future[T] =
+    db.queryHeadAs(render(params), transform)
+
   def runHeadOpt(params: P)(implicit db: Kuzminki): Future[Option[R]] =
     db.queryHeadOpt(render(params))
+
+  def runHeadOptAs[T](params: P)(implicit transform: R => T, db: Kuzminki): Future[Option[T]] =
+    db.queryHeadOptAs(render(params), transform)
 }
 
 

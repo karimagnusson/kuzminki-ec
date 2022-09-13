@@ -9,7 +9,7 @@ Kuzminki is written for those who like SQL. Queries are written with the same lo
 This library is also available for [ZIO](https://zio.dev/) [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
 And for ZIO 2 [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
 
-See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
+See full documentation at [https://kuzminki.io/](https://kuzminki.io/0.9.4-RC1.html)
 
 #### Sbt
 ```sbt

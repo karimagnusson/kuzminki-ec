@@ -43,33 +43,13 @@ class Having[M, R](
     )
   }
 
-  @deprecated("use having", "0.9.2")
-  def havingOne(pick: M => Filter) = {
-    toOrderBy(
-      HavingSec(
-        Vector(pick(model))
-      )
-    )
-  }
-
-  def havingOpts(pick: M => Seq[Option[Filter]]) = {
+  def havingOpt(pick: M => Seq[Option[Filter]]) = {
     toOrderBy(
       pick(model).flatten match {
         case Nil =>
           HavingBlankSec
         case filters =>
-          HavingSec(pick(model).toVector.flatten)
-      }
-    )
-  }
-
-  def havingOpt(pick: M => Option[Filter]) = {
-    toOrderBy(
-      pick(model) match {
-        case Some(cond) =>
-          HavingSec(Vector(cond))
-        case None =>
-          HavingBlankSec
+          HavingSec(filters.toVector)
       }
     )
   }

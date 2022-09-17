@@ -16,7 +16,7 @@
 
 package kuzminki.section
 
-import kuzminki.column.AnyCol
+import kuzminki.column.TypeCol
 import kuzminki.assign.{SetValue, SetUpsert}
 import kuzminki.model.ModelTable
 import kuzminki.render.{Renderable, Prefix, NoArgs}
@@ -29,57 +29,48 @@ package object insert extends ReturningSections {
     val expression = "INSERT INTO %s"
   }
 
-  case class InsertDataSec(parts: Vector[SetValue]) extends Section with FillValues {
-    val expression = "(%s) VALUES (%s)"
-    def render(prefix: Prefix) = expression.format(
-      parts.map(_.col.render(prefix)).mkString(", "),
-      fillNoBrackets(parts.size)
-    )
-    val args = parts.map(_.value)
-  }
-
-  case class InsertColumnsSec(parts: Vector[AnyCol]) extends MultiPartRender {
+  case class InsertColumnsSec(parts: Vector[TypeCol[_]]) extends MultiPartRender {
     val expression = "(%s)"
     val glue = ", "
   }
 
   case class InsertValuesSec(values: Vector[Any]) extends Section with FillValues {
-    val expression = "VALUES %s"
-    def render(prefix: Prefix) = expression.format(fillBrackets(values.size))
+    val expression = "VALUES (%s)"
+    def render(prefix: Prefix) = expression.format(fillByValues(values))
     val args = values
   }
 
-  case class InsertBlankValuesSec(size: Int) extends Section with FillValues with NoArgs {
-    val expression = "VALUES %s"
-    def render(prefix: Prefix) = expression.format(fillBrackets(size))
+  case class InsertBlankValuesSec(cols: Vector[TypeCol[_]]) extends Section with FillValues with NoArgs {
+    val expression = "VALUES (%s)"
+    def render(prefix: Prefix) = expression.format(fillByCols(cols))
   }
 
-  case class InsertMultipleValuesSec(valuesList: Vector[Vector[Any]]) extends Section with FillValues {
-    val expression = "VALUES %s"
-    def render(prefix: Prefix) = {
-      expression.format(
-        valuesList.map(values => fillBrackets(values.size)).mkString(", ")
-      )
-    }
-    val args = valuesList.flatten
-  }
-
-  case class InsertBlankWhereNotExistsSec(size: Int, table: ModelTable, where: WhereSec) extends Section with FillValues with NoArgs {
+  case class InsertWhereNotExistsSec(values: Vector[Any], table: ModelTable, where: WhereSec) extends Section with FillValues {
     val expression = "SELECT %s WHERE NOT EXISTS (SELECT 1 FROM %s %s)"
-    def render(prefix: Prefix) = {
-      expression.format(
-        fillNoBrackets(size),
-        table.render(prefix),
-        where.render(prefix)
-      )
-    }
+    def render(prefix: Prefix) = expression.format(
+      fillByValues(values),
+      table.render(prefix),
+      where.render(prefix)
+    )
+    val args = values ++ where.args
   }
+
+  case class InsertBlankWhereNotExistsSec(cols: Vector[TypeCol[_]], table: ModelTable, where: WhereSec) extends Section with FillValues with NoArgs {
+    val expression = "SELECT %s WHERE NOT EXISTS (SELECT 1 FROM %s %s)"
+    def render(prefix: Prefix) = expression.format(
+      fillByCols(cols),
+      table.render(prefix),
+      where.render(prefix)
+    )
+  }
+
+  // on conflict
 
   object InsertOnConflictSec extends TextOnlyRender {
     val expression = "ON CONFLICT"
   }
 
-  case class InsertOnConflictColumnSec(part: AnyCol) extends SinglePartRender {
+  case class InsertOnConflictColumnSec(part: TypeCol[_]) extends SinglePartRender {
     val expression = "ON CONFLICT (%s)"
   }
 

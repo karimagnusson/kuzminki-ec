@@ -16,37 +16,63 @@
 
 package kuzminki.update
 
-import scala.concurrent.Future
-import kuzminki.api.Kuzminki
 import kuzminki.shape.ParamConv
-import kuzminki.render.RenderedOperation
+import kuzminki.shape.RowConv
+import kuzminki.run.{
+  RunUpdate,
+  RunUpdateReturning
+}
+import kuzminki.render.{
+  RenderedOperation,
+  RenderedQuery
+}
 
 
 class StoredUpdate[P1, P2](
-    statement: String,
-    changes: ParamConv[P1],
-    filters: ParamConv[P2]
-  ) {
+  statement: String,
+  changes: ParamConv[P1],
+  filters: ParamConv[P2]
+) extends RunUpdate[P1, P2] {
 
-  def render(changeArgs: P1, filterArgs: P2) = {
+  def render(p1: P1, p2: P2) = {
     RenderedOperation(
       statement,
-      changes.fromShape(changeArgs) ++ filters.fromShape(filterArgs)
+      changes.fromShape(p1) ++ filters.fromShape(p2)
     )
   }
 
-  // run
-
-  def run(changeArgs: P1, filterArgs: P2)(implicit db: Kuzminki): Future[Unit] =
-    db.exec(render(changeArgs, filterArgs))
-
-  def runNum(changeArgs: P1, filterArgs: P2)(implicit db: Kuzminki): Future[Int] =
-    db.execNum(render(changeArgs, filterArgs))
-
-  // debug
-
-  def debugSql(handler: String => Unit) = {
-    handler(statement)
+  def printSql = {
+    println(statement)
     this
   }
 }
+
+
+class StoredUpdateReturning[P1, P2, R](
+  statement: String,
+  changes: ParamConv[P1],
+  filters: ParamConv[P2],
+  rowConv: RowConv[R]
+) extends RunUpdateReturning[P1, P2, R] {
+
+  def render(p1: P1, p2: P2) = {
+    RenderedQuery(
+      statement,
+      changes.fromShape(p1) ++ filters.fromShape(p2),
+      rowConv
+    )
+  }
+
+  def printSql = {
+    println(statement)
+    this
+  }
+}
+
+
+
+
+
+
+
+

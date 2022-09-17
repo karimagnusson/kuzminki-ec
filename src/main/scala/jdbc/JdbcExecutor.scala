@@ -17,6 +17,7 @@
 package kuzminki.jdbc
 
 import java.util.Properties
+import java.util.UUID
 import java.sql.Connection
 import java.sql.{Statement, PreparedStatement}
 import java.sql.ResultSet
@@ -30,6 +31,7 @@ import com.zaxxer.hikari.HikariDataSource
 
 import kuzminki.api.{DbConfig, KuzminkiError}
 import kuzminki.shape.RowConv
+import kuzminki.api.Jsonb
 import kuzminki.render.{
   RenderedQuery,
   RenderedOperation
@@ -73,6 +75,8 @@ class JdbcExecutor(pool: HikariDataSource, dbContext: ExecutionContext) {
       case value: Time        => jdbcStm.setTime(index, value)
       case value: Date        => jdbcStm.setDate(index, value)
       case value: Timestamp   => jdbcStm.setTimestamp(index, value)
+      case value: Jsonb       => jdbcStm.setString(index, value.value)
+      case value: UUID        => jdbcStm.setObject(index, value)
       case value: Seq[_]      => jdbcStm.setArray(index, arrayArg(jdbcStm.getConnection, value))
       case _                  => throw KuzminkiError(s"type not supported [$arg]")
     }
@@ -124,6 +128,27 @@ class JdbcExecutor(pool: HikariDataSource, dbContext: ExecutionContext) {
       jdbcStm.close()
       conn.close()
       num
+    } (dbContext)
+  }
+
+  def execList(stms: Seq[RenderedOperation]): Future[Unit] = {
+    Future {
+      val conn = pool.getConnection()
+      try {
+        conn.setAutoCommit(false)
+        stms.foreach { stm => 
+          val jdbcStm = getStatement(conn, stm.statement, stm.args)
+          jdbcStm.execute()
+        }
+        conn.commit()
+        conn.setAutoCommit(true)
+        ()
+      } catch {
+        case th: Throwable =>
+          conn.rollback()
+          conn.setAutoCommit(true)
+          throw th
+      }
     } (dbContext)
   }
 

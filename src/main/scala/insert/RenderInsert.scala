@@ -16,75 +16,20 @@
 
 package kuzminki.insert
 
-import kuzminki.api.Kuzminki
 import kuzminki.shape.ParamConv
 import kuzminki.shape.RowConv
+import kuzminki.run.{
+  RunQuery,
+  RunOperation
+}
 import kuzminki.render.{
-  RunQueryParams,
-  RunOperation,
-  RunOperationParams,
   RenderedQuery,
   RenderedOperation,
   SectionCollector
 }
 
 
-class RenderInsert[P](
-    coll: SectionCollector,
-    paramConv: ParamConv[P]
-  ) extends RunOperationParams[P] {
-
-  def cache = {
-    new StoredInsert(
-      coll.render,
-      paramConv
-    )
-  }
-
-  def render(params: P) = {
-    RenderedOperation(
-      coll.render,
-      paramConv.fromShape(params)
-    )
-  }
-
-  def debugSql(handler: String => Unit) = {
-    handler(coll.render)
-    this
-  }
-}
-
-
-class RenderInsertReturning[P, R](
-    coll: SectionCollector,
-    paramConv: ParamConv[P],
-    rowConv: RowConv[R]
-  ) extends RunQueryParams[P, R] {
-
-  def cache = {
-    new StoredInsertReturning(
-      coll.render,
-      paramConv,
-      rowConv
-    )
-  }
-
-  def render(params: P) = {
-    RenderedQuery(
-      coll.render,
-      paramConv.fromShape(params),
-      rowConv
-    )
-  }
-
-  def debugSql(handler: String => Unit) = {
-    handler(coll.render)
-    this
-  }
-}
-
-
-class RenderInsertNoCache(
+class RenderInsert(
     coll: SectionCollector
   ) extends RunOperation {
 
@@ -95,11 +40,67 @@ class RenderInsertNoCache(
     )
   }
 
-  def debugSql(handler: String => Unit) = {
-    handler(coll.render)
+  def printSql = {
+    println(coll.render)
     this
   }
 }
+
+
+class RenderInsertReturning[R](
+  coll: SectionCollector,
+  rowConv: RowConv[R]
+) extends RunQuery[R] {
+
+  def render = {
+    new RenderedQuery(
+      coll.render,
+      coll.args,
+      rowConv
+    )
+  }
+
+  def printSql = {
+    println(coll.render)
+    this
+  }
+}
+
+
+class RenderStoredInsert[P](
+  coll: SectionCollector,
+  paramConv: ParamConv[P]
+) {
+
+  def cache = {
+    new StoredInsert(
+      coll.render,
+      paramConv
+    )
+  }
+}
+
+
+class RenderStoredInsertReturning[P, R](
+  coll: SectionCollector,
+  paramConv: ParamConv[P],
+  rowConv: RowConv[R]
+) {
+
+  def cache = {
+    new StoredInsertReturning(
+      coll.render,
+      paramConv,
+      rowConv
+    )
+  }
+}
+
+
+
+
+
+
 
 
 

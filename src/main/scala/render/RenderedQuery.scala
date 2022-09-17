@@ -20,13 +20,13 @@ import kuzminki.shape.RowConv
 
 
 case class RenderedQuery[R](
-    statement: String,
-    args: Vector[Any],
-    rowConv: RowConv[R]
-  ) {
+  statement: String,
+  args: Vector[Any],
+  rowConv: RowConv[R]
+) {
 
-  def debugSql(handler: String => Unit) = {
-    handler(statement)
+  def printSql = {
+    println(statement)
     this
   }
 }

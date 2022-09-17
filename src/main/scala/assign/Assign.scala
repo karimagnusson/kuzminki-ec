@@ -16,46 +16,79 @@
 
 package kuzminki.assign
 
-import kuzminki.column.ModelCol
-import kuzminki.render.{Renderable, Prefix}
+import kuzminki.column.{TypeCol, ModelCol}
+import kuzminki.render.{Renderable, Prefix, Wrap}
+import kuzminki.api.KuzminkiError
+import kuzminki.api.Jsonb
 
 
-trait Assign extends Renderable
-
-case class SetValue(col: ModelCol, value: Any) extends Assign {
-  def render(prefix: Prefix) = s"${col.name} = ?"
-  val args = Vector(value)
+abstract class Assign(col: TypeCol[_], valueOpt: Option[Any]) extends Renderable with Wrap {
+  val template: String
+  def name = wrap(col.name)
+  def render(prefix: Prefix) = template
+  val args = valueOpt match {
+    case Some(value) => Vector(value)
+    case None => Vector.empty[Any]
+  }
+  col match {
+    case col: ModelCol =>
+    case _ => throw KuzminkiError("cannot update a function") 
+  }
 }
 
-case class SetToNull(col: ModelCol) extends Assign {  
-  def render(prefix: Prefix) = s"${col.name} = NULL"
-  val args = Vector.empty[Any]
+// general
+
+case class SetValue(col: TypeCol[_], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = ?"
 }
 
-case class Increment(col: ModelCol, value: Any) extends Assign {
-  def render(prefix: Prefix) = s"${col.name} = ${col.name} + ?"
-  val args = Vector(value)
+case class SetToNull(col: TypeCol[_]) extends Assign(col, None) {
+  val template = s"$name = NULL"
 }
 
-case class Decrement(col: ModelCol, value: Any) extends Assign {
-  def render(prefix: Prefix) = s"${col.name} = ${col.name} - ?"
-  val args = Vector(value)
+// numeric
+
+case class Increment(col: TypeCol[_], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = $name + ?"
 }
 
-case class Append(col: ModelCol, value: Any) extends Assign {
-  def render(prefix: Prefix) = s"${col.name} = array_append(${col.name}, ?)"
-  val args = Vector(value)
+case class Decrement(col: TypeCol[_], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = $name - ?"
 }
 
-case class Prepend(col: ModelCol, value: Any) extends Assign {
-  def render(prefix: Prefix) = s"${col.name} = array_prepend(?, ${col.name})"
-  val args = Vector(value)
+// array
+
+case class Append(col: TypeCol[_], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = array_append($name, ?)"
 }
 
-case class Remove(col: ModelCol, value: Any) extends Assign {
-  def render(prefix: Prefix) = s"${col.name} = array_remove(${col.name}, ?)"
-  val args = Vector(value)
+case class Prepend(col: TypeCol[_], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = array_prepend(?, $name)"
 }
+
+case class Remove(col: TypeCol[_], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = array_remove($name, ?)"
+}
+
+// jsonb
+
+case class JsonbSetValue(col: TypeCol[Jsonb], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = ?::jsonb"
+}
+
+case class JsonbUpdate(col: TypeCol[Jsonb], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = $name || ?::jsonb"
+}
+
+case class JsonbDel(col: TypeCol[Jsonb], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = $name - ?"
+}
+
+case class JsonbDelPath(col: TypeCol[Jsonb], value: Any) extends Assign(col, Some(value)) {
+  val template = s"$name = $name #- ?"
+}
+
+
 
 
 

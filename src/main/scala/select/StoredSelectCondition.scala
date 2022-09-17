@@ -16,7 +16,8 @@
 
 package kuzminki.select
 
-import kuzminki.render.{RunQueryParams, RenderedQuery}
+import kuzminki.run.RunQueryParams
+import kuzminki.render.RenderedQuery
 import kuzminki.shape.ParamConv
 import kuzminki.shape.RowConv
 
@@ -36,8 +37,8 @@ class StoredSelectCondition[P, R](
     )
   }
 
-  def debugSql(handler: String => Unit) = {
-    handler(statement)
+  def printSql = {
+    println(statement)
     this
   }
 }

@@ -16,13 +16,23 @@
 
 package kuzminki.filter.types
 
-import kuzminki.column.AnyCol
+import kuzminki.filter.Filter
+import kuzminki.column.TypeCol
+import kuzminki.render.{Renderable, Prefix}
 import kuzminki.render.Renderable
 
-case class FilterInSubquery(col: AnyCol, sub: Renderable) extends SubqueryFilter {
+
+trait SubqueryFilter extends Filter {
+  val col: TypeCol[_]
+  val sub: Renderable
+  def render(prefix: Prefix) = template.format(col.render(prefix), sub.render(prefix))
+  val args = col.args ++ sub.args
+}
+
+case class FilterInSubquery[T](col: TypeCol[T], sub: Renderable) extends SubqueryFilter {
   val template = "%s = ANY(%s)"
 }
 
-case class FilterNotInSubquery(col: AnyCol, sub: Renderable) extends SubqueryFilter {
+case class FilterNotInSubquery[T](col: TypeCol[T], sub: Renderable) extends SubqueryFilter {
   val template = "%s != ANY(%s)"
 }

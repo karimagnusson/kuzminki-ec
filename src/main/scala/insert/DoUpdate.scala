@@ -16,85 +16,48 @@
 
 package kuzminki.insert
 
-import kuzminki.column.{ModelCol, TypeCol}
-import kuzminki.api.KuzminkiError
-import kuzminki.shape.ParamShape
-import kuzminki.assign.SetUpsert
-import kuzminki.render.SectionCollector
-import kuzminki.section.insert._
+import kuzminki.api.Model
+import kuzminki.column.TypeCol
 
 
-class DoUpdate[M, P](
-    model: M,
-    coll: SectionCollector,
-    paramShape: ParamShape[P],
-    conflictCol: ModelCol
-  ) {
+class DoUpdate[M <: Model, P](
+  builder: ValuesBuilder[M],
+  conflictCol: TypeCol[_]
+) {
+
+  def doNothing = new RenderInsert(
+    builder.onConflictColDoNothing(conflictCol)
+  )
+
+  def doUpdate(pick: M => Seq[TypeCol[_]]) = new RenderInsert(
+    builder.onConflictColDoUpdate(
+      conflictCol,
+      pick(builder.model).toVector
+    )
+  )
+}
+
+
+class DoUpdateStored[M <: Model, P](
+  builder: InsertBuilder[M, P],
+  conflictCol: TypeCol[_]
+) {
 
   def doNothing = {
-    new RenderInsert(
-      coll.extend(Vector(
-        InsertBlankValuesSec(paramShape.size),
-        InsertOnConflictSec,
-        InsertDoNothingSec
-      )),
-      paramShape.conv
+    new RenderStoredInsert(
+      builder.onConflictColDoNothing(conflictCol),
+      builder.paramShape.conv
     )
   }
 
   def doUpdate(pick: M => Seq[TypeCol[_]]) = {
-    doUpdateApply(
-      pick(model).toVector
-    )
-  }
-
-  @deprecated("use doUpdate", "0.9.2")
-  def doUpdateOne[T](pick: M => TypeCol[T]) = {
-    doUpdateApply(
-      Vector(pick(model))
-    )
-  }
-
-  protected def validate(
-        conflictCol: ModelCol,
-        updateTypeCols: Vector[TypeCol[_]]
-      ) = {
-
-    val updateCols = updateTypeCols.map {
-      case col: ModelCol => col
-      case _ => throw KuzminkiError("no update columns selected")
-    }
-
-    if (updateCols.isEmpty) {
-      throw KuzminkiError("no update columns selected")
-    }
-
-    if (updateCols.contains(conflictCol)) {
-      throw KuzminkiError("cannot update the conflicting column")
-    }
-
-    updateCols
-  }
-
-  private def doUpdateApply(updateTypeCols: Vector[TypeCol[_]]) = {
-    val updateCols = validate(conflictCol, updateTypeCols)
-    new RenderInsert(
-      coll.extend(Vector(
-        InsertBlankValuesSec(paramShape.size),
-        InsertOnConflictColumnSec(conflictCol),
-        InsertDoUpdateNoArgsSec(updateCols.map(SetUpsert(_)))
-      )),
-      new ParamConvReuse(
-        paramShape.conv,
-        Reuse.fromIndex(paramShape.cols, updateCols)
-      )
+    val updateCols = pick(builder.model).toVector
+    new RenderStoredInsert(
+      builder.onConflictColDoUpdate(conflictCol, updateCols),
+      builder.onConflictColDoUpdateReuse(updateCols)
     )
   }
 }
-
-
-
-
 
 
 

@@ -19,19 +19,21 @@ package kuzminki
 import java.sql.Time
 import java.sql.Date
 import java.sql.Timestamp
+import java.util.UUID
 import scala.language.implicitConversions
 
 import kuzminki.column._
-import kuzminki.filter.Filter
+import kuzminki.filter._
 import kuzminki.sorting.Sorting
 import kuzminki.assign.Assign
 import kuzminki.update.RenderUpdate
 import kuzminki.delete.RenderDelete
-import kuzminki.insert.RenderInsertData
+import kuzminki.insert.{RenderInsert, Values}
 import kuzminki.select.{
   RenderSelect,
   SelectSubquery,
-  AggregationSubquery
+  AggregationSubquery,
+  Offset
 }
 import kuzminki.render.{
   RawSQLStatement,
@@ -55,6 +57,8 @@ package object api {
   implicit val kzimplTimeCol: ColInfo => TypeCol[Time] = info => TimeModelCol(info)
   implicit val kzimplDateCol: ColInfo => TypeCol[Date] = info => DateModelCol(info)
   implicit val kzimplTimestampCol: ColInfo => TypeCol[Timestamp] = info => TimestampModelCol(info)
+  implicit val kzimplJsonbCol: ColInfo => TypeCol[Jsonb] = info => JsonbModelCol(info)
+  implicit val kzimplUUIDCol: ColInfo => TypeCol[UUID] = info => UUIDModelCol(info)
 
   implicit val kzimplStringSeqCol: ColInfo => TypeCol[Seq[String]] = info => StringSeqModelCol(info)
   implicit val kzimplBooleanSeqCol: ColInfo => TypeCol[Seq[Boolean]] = info => BooleanSeqModelCol(info)
@@ -68,76 +72,33 @@ package object api {
   implicit val kzimplDateSeqCol: ColInfo => TypeCol[Seq[Date]] = info => DateSeqModelCol(info)
   implicit val kzimplTimestampSeqCol: ColInfo => TypeCol[Seq[Timestamp]] = info => TimestampSeqModelCol(info)
 
-  // model type col
+  // filters
 
-  implicit val kzimplToStringModelCol: TypeCol[String] => StringModelCol = col => col.asInstanceOf[StringModelCol]
-  implicit val kzimplToBooleanModelCol: TypeCol[Boolean] => BooleanModelCol = col => col.asInstanceOf[BooleanModelCol]
-  implicit val kzimplToShortModelCol: TypeCol[Short] => ShortModelCol = col => col.asInstanceOf[ShortModelCol]
-  implicit val kzimplToIntModelCol: TypeCol[Int] => IntModelCol = col => col.asInstanceOf[IntModelCol]
-  implicit val kzimplToLongModelCol: TypeCol[Long] => LongModelCol = col => col.asInstanceOf[LongModelCol]
-  implicit val kzimplToFloatModelCol: TypeCol[Float] => FloatModelCol = col => col.asInstanceOf[FloatModelCol]
-  implicit val kzimplToDoubleModelCol: TypeCol[Double] => DoubleModelCol = col => col.asInstanceOf[DoubleModelCol]
-  implicit val kzimplToBigDecimalModelCol: TypeCol[BigDecimal] => BigDecimalModelCol = col => col.asInstanceOf[BigDecimalModelCol]
-  implicit val kzimplToTimeModelCol: TypeCol[Time] => TimeModelCol = col => col.asInstanceOf[TimeModelCol]
-  implicit val kzimplToDateModelCol: TypeCol[Date] => DateModelCol = col => col.asInstanceOf[DateModelCol]
-  implicit val kzimplToTimestampModelCol: TypeCol[Timestamp] => TimestampModelCol = col => col.asInstanceOf[TimestampModelCol]
+  implicit class StringImpl(val col: TypeCol[String]) extends StringMethods
+  implicit class BooleanImpl(val col: TypeCol[Boolean]) extends TypeMethods[Boolean]
+  implicit class ShortImpl(val col: TypeCol[Short]) extends ComparativeMethods[Short]
+  implicit class IntImpl(val col: TypeCol[Int]) extends ComparativeMethods[Int]
+  implicit class LongImpl(val col: TypeCol[Long]) extends ComparativeMethods[Long]
+  implicit class FloatImpl(val col: TypeCol[Float]) extends ComparativeMethods[Float]
+  implicit class DoubleImpl(val col: TypeCol[Double]) extends ComparativeMethods[Double]
+  implicit class BigDecimalImpl(val col: TypeCol[BigDecimal]) extends ComparativeMethods[BigDecimal]
+  implicit class TimeImpl(val col: TypeCol[Time]) extends ComparativeMethods[Time]
+  implicit class DateImpl(val col: TypeCol[Date]) extends ComparativeMethods[Date]
+  implicit class TimestampImpl(val col: TypeCol[Timestamp]) extends ComparativeMethods[Timestamp]
+  implicit class JsonbImpl(val col: TypeCol[Jsonb]) extends JsonbMethods
+  implicit class UUIDImpl(val col: TypeCol[UUID]) extends TypeMethods[UUID]
 
-  implicit val kzimplToStringSeqModelCol: TypeCol[Seq[String]] => StringSeqModelCol = col => col.asInstanceOf[StringSeqModelCol]
-  implicit val kzimplToBooleanSeqModelCol: TypeCol[Seq[Boolean]] => BooleanSeqModelCol = col => col.asInstanceOf[BooleanSeqModelCol]
-  implicit val kzimplToShortSeqModelCol: TypeCol[Seq[Short]] => ShortSeqModelCol = col => col.asInstanceOf[ShortSeqModelCol]
-  implicit val kzimplToIntSeqModelCol: TypeCol[Seq[Int]] => IntSeqModelCol = col => col.asInstanceOf[IntSeqModelCol]
-  implicit val kzimplToLongSeqModelCol: TypeCol[Seq[Long]] => LongSeqModelCol = col => col.asInstanceOf[LongSeqModelCol]
-  implicit val kzimplToFloatSeqModelCol: TypeCol[Seq[Float]] => FloatSeqModelCol = col => col.asInstanceOf[FloatSeqModelCol]
-  implicit val kzimplToDoubleSeqModelCol: TypeCol[Seq[Double]] => DoubleSeqModelCol = col => col.asInstanceOf[DoubleSeqModelCol]
-  implicit val kzimplToBigDecimalSeqModelCol: TypeCol[Seq[BigDecimal]] => BigDecimalSeqModelCol = col => col.asInstanceOf[BigDecimalSeqModelCol]
-  implicit val kzimplToTimeSeqModelCol: TypeCol[Seq[Time]] => TimeSeqModelCol = col => col.asInstanceOf[TimeSeqModelCol]
-  implicit val kzimplToDateSeqModelCol: TypeCol[Seq[Date]] => DateSeqModelCol = col => col.asInstanceOf[DateSeqModelCol]
-  implicit val kzimplToTimestampSeqModelCol: TypeCol[Seq[Timestamp]] => TimestampSeqModelCol = col => col.asInstanceOf[TimestampSeqModelCol]
-
-  // type col
-
-  implicit val kzimplTypeColToStringCol: TypeCol[String] => StringCol = col => col.asInstanceOf[StringCol]
-  implicit val kzimplTypeColToBooleanCol: TypeCol[Boolean] => BooleanCol = col => col.asInstanceOf[BooleanCol]
-  implicit val kzimplTypeColToShortCol: TypeCol[Short] => ShortCol = col => col.asInstanceOf[ShortCol]
-  implicit val kzimplTypeColToIntCol: TypeCol[Int] => IntCol = col => col.asInstanceOf[IntCol]
-  implicit val kzimplTypeColToLongCol: TypeCol[Long] => LongCol = col => col.asInstanceOf[LongCol]
-  implicit val kzimplTypeColToFloatCol: TypeCol[Float] => FloatCol = col => col.asInstanceOf[FloatCol]
-  implicit val kzimplTypeColToDoubleCol: TypeCol[Double] => DoubleCol = col => col.asInstanceOf[DoubleCol]
-  implicit val kzimplTypeColToBigDecimalCol: TypeCol[BigDecimal] => BigDecimalCol = col => col.asInstanceOf[BigDecimalCol]
-  implicit val kzimplTypeColToTimeCol: TypeCol[Time] => TimeCol = col => col.asInstanceOf[TimeCol]
-  implicit val kzimplTypeColToDateCol: TypeCol[Date] => DateCol = col => col.asInstanceOf[DateCol]
-  implicit val kzimplTypeColToTimestampCol: TypeCol[Timestamp] => TimestampCol = col => col.asInstanceOf[TimestampCol]
-
-  implicit val kzimplTypeColToStringSeqCol: TypeCol[Seq[String]] => StringSeqCol = col => col.asInstanceOf[StringSeqCol]
-  implicit val kzimplTypeColToBooleanSeqCol: TypeCol[Seq[Boolean]] => BooleanSeqCol = col => col.asInstanceOf[BooleanSeqCol]
-  implicit val kzimplTypeColToShortSeqCol: TypeCol[Seq[Short]] => ShortSeqCol = col => col.asInstanceOf[ShortSeqCol]
-  implicit val kzimplTypeColToIntSeqCol: TypeCol[Seq[Int]] => IntSeqCol = col => col.asInstanceOf[IntSeqCol]
-  implicit val kzimplTypeColToLongSeqCol: TypeCol[Seq[Long]] => LongSeqCol = col => col.asInstanceOf[LongSeqCol]
-  implicit val kzimplTypeColToFloatSeqCol: TypeCol[Seq[Float]] => FloatSeqCol = col => col.asInstanceOf[FloatSeqCol]
-  implicit val kzimplTypeColToDoubleSeqCol: TypeCol[Seq[Double]] => DoubleSeqCol = col => col.asInstanceOf[DoubleSeqCol]
-  implicit val kzimplTypeColToBigDecimalSeqCol: TypeCol[Seq[BigDecimal]] => BigDecimalSeqCol = col => col.asInstanceOf[BigDecimalSeqCol]
-  implicit val kzimplTypeColToTimeSeqCol: TypeCol[Seq[Time]] => TimeSeqCol = col => col.asInstanceOf[TimeSeqCol]
-  implicit val kzimplTypeColToDateSeqCol: TypeCol[Seq[Date]] => DateSeqCol = col => col.asInstanceOf[DateSeqCol]
-  implicit val kzimplTypeColToTimestampSeqCol: TypeCol[Seq[Timestamp]] => TimestampSeqCol = col => col.asInstanceOf[TimestampSeqCol]
-
-  // named cols
-  
-  implicit val addColName: TypeCol[_] => Tuple2[String, TypeCol[_]] = {
-    case col: ModelCol => (col.name, col)
-    case _ => throw KuzminkiError("Column used in colsNamed must be a ModelCol")
-  }
-
-  // pick one
-
-  implicit val kzimplFilterToSeq: Filter => Seq[Filter] = filter => Seq(filter)
-  implicit val kzimplSortingToSeq: Sorting => Seq[Sorting] = sorting => Seq(sorting)
-  implicit val kzimplAssignToSeq: Assign => Seq[Assign] = assign => Seq(assign)
-  implicit def kzimplTypeColToSeq[T](col: TypeCol[T]): Seq[TypeCol[_]] = Seq(col)
-
-  // raw SQL
-
-  implicit val kzimplRawToQuery: RawSQLStatement => RenderedQuery[Vector[Any]] = rss => rss.toQuery
-  implicit val kzimplRawToOperation: RawSQLStatement => RenderedOperation = rss => rss.toOperation
+  implicit class StringSeqImpl(val col: TypeCol[Seq[String]]) extends SeqMethods[String]
+  implicit class BooleanSeqImpl(val col: TypeCol[Seq[Boolean]]) extends SeqMethods[Boolean]
+  implicit class ShortSeqImpl(val col: TypeCol[Seq[Short]]) extends SeqMethods[Short]
+  implicit class IntSeqImpl(val col: TypeCol[Seq[Int]]) extends SeqMethods[Int]
+  implicit class LongSeqImpl(val col: TypeCol[Seq[Long]]) extends SeqMethods[Long]
+  implicit class FloatSeqImpl(val col: TypeCol[Seq[Float]]) extends SeqMethods[Float]
+  implicit class DoubleSeqImpl(val col: TypeCol[Seq[Double]]) extends SeqMethods[Double]
+  implicit class BigDecimalSeqImpl(val col: TypeCol[Seq[BigDecimal]]) extends SeqMethods[BigDecimal]
+  implicit class TimeSeqImpl(val col: TypeCol[Seq[Time]]) extends SeqMethods[Time]
+  implicit class DateSeqImpl(val col: TypeCol[Seq[Date]]) extends SeqMethods[Date]
+  implicit class TimestampSeqImpl(val col: TypeCol[Seq[Timestamp]]) extends SeqMethods[Timestamp]
 
   // render
 
@@ -146,9 +107,27 @@ package object api {
   implicit val kzimplRenderAggregation: RenderSelect[_, _] => AggregationSubquery = q => q.asAggregation
   implicit val kzimplRenderUpdate: RenderUpdate[_] => RenderedOperation = q => q.render
   implicit val kzimplRenderDelete: RenderDelete[_] => RenderedOperation = q => q.render
-  implicit val kzimplRenderInsert: RenderInsertData[_, _] => RenderedOperation = q => q.render
+  implicit val kzimplRenderInsert: RenderInsert => RenderedOperation = q => q.render
+  implicit val kzimplRenderValues: Values[_] => RenderedOperation = q => q.render
 
-  implicit class RawSQL(val sc: StringContext) extends AnyVal {
+  // named cols
+  
+  implicit val kzimplAddColName: TypeCol[_] => Tuple2[String, TypeCol[_]] = col => (col.name, col)
+
+  // pick one
+
+  implicit def kzimplTypeColToSeq[T](col: TypeCol[T]): Seq[TypeCol[_]] = Seq(col)
+  implicit val kzimplFilterToSeq: Filter => Seq[Filter] = filter => Seq(filter)
+  implicit val kzimplFilterOptToSeq: Option[Filter] => Seq[Option[Filter]] = filterOpt => Seq(filterOpt)
+  implicit val kzimplSortingToSeq: Sorting => Seq[Sorting] = sorting => Seq(sorting)
+  implicit val kzimplAssignToSeq: Assign => Seq[Assign] = assign => Seq(assign)
+
+  // raw SQL
+
+  implicit val kzimplRawToQuery: RawSQLStatement => RenderedQuery[Vector[Any]] = rss => rss.toQuery
+  implicit val kzimplRawToOperation: RawSQLStatement => RenderedOperation = rss => rss.toOperation
+
+  implicit class KzRawSQL(val sc: StringContext) extends AnyVal {
     def rsql(args: Any*): RawSQLStatement = {
       val strings = sc.parts.iterator
       val expressions = args.iterator

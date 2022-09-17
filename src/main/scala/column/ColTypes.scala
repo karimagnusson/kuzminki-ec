@@ -1,242 +1,107 @@
-/*
-* Copyright 2021 Kári Magnússon
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
-
 package kuzminki.column
 
 import java.sql.Time
 import java.sql.Date
 import java.sql.Timestamp
+import java.util.UUID
+import kuzminki.conv._
+import kuzminki.filter._
+import kuzminki.api.Jsonb
 
 
-trait StringCol extends StringColValue
-                   with UniversalFilters[String]
-                   with StringFilters {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait StringCol extends TypeCol[String] {
+  val conv = StringConv
 }
 
-
-trait BooleanCol extends BooleanColValue
-                    with UniversalFilters[Boolean] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait BooleanCol extends TypeCol[Boolean] {
+  val conv = BooleanConv
 }
 
-
-trait ShortCol extends ShortColValue
-                  with UniversalFilters[Short]
-                  with ComparativeFilters[Short]
-                  with AggregationSubqueryFilters[Short] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait ShortCol extends TypeCol[Short] {
+  val conv = ShortConv
 }
 
-
-trait IntCol extends IntColValue
-                with SelfRef[Int]
-                with UniversalFilters[Int]
-                with ComparativeFilters[Int]
-                with AggregationSubqueryFilters[Int] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait IntCol extends TypeCol[Int] {
+  val conv = IntConv
 }
 
-
-trait LongCol extends LongColValue
-                 with UniversalFilters[Long]
-                 with ComparativeFilters[Long]
-                 with AggregationSubqueryFilters[Long] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait LongCol extends TypeCol[Long] {
+  val conv = LongConv
 }
 
-
-trait FloatCol extends FloatColValue
-                  with UniversalFilters[Float]
-                  with ComparativeFilters[Float]
-                  with AggregationSubqueryFilters[Float] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait FloatCol extends TypeCol[Float] {
+  val conv = FloatConv
 }
 
-
-trait DoubleCol extends DoubleColValue
-                   with UniversalFilters[Double]
-                   with ComparativeFilters[Double]
-                   with AggregationSubqueryFilters[Double] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait DoubleCol extends TypeCol[Double] {
+  val conv = DoubleConv
 }
 
-
-trait BigDecimalCol extends BigDecimalColValue
-                       with UniversalFilters[BigDecimal]
-                       with ComparativeFilters[BigDecimal]
-                       with AggregationSubqueryFilters[BigDecimal] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait BigDecimalCol extends TypeCol[BigDecimal] {
+  val conv = BigDecimalConv
 }
 
-
-trait TimeCol extends TimeColValue
-                 with UniversalFilters[Time]
-                 with ComparativeFilters[Time] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait TimeCol extends TypeCol[Time] {
+  val conv = TimeConv
 }
 
-
-trait DateCol extends DateColValue
-                 with UniversalFilters[Date]
-                 with ComparativeFilters[Date] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait DateCol extends TypeCol[Date] {
+  val conv = DateConv
 }
 
-
-trait TimestampCol extends TimestampColValue
-                      with UniversalFilters[Timestamp]
-                      with ComparativeFilters[Timestamp] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait TimestampCol extends TypeCol[Timestamp] {
+  val conv = TimestampConv
 }
 
-// seq
-
-trait StringSeqCol extends StringSeqColValue
-                      with SeqFilters[String] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait JsonbCol extends TypeCol[Jsonb] {
+  val conv = JsonbConv
 }
 
-
-trait BooleanSeqCol extends BooleanSeqColValue
-                       with SeqFilters[Boolean] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait UUIDCol extends TypeCol[UUID] {
+  val conv = UUIDConv
 }
 
-
-trait ShortSeqCol extends ShortSeqColValue
-                     with SeqFilters[Short] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait StringSeqCol extends TypeCol[Seq[String]] {
+  val conv = StringSeqConv
 }
 
-
-trait IntSeqCol extends IntSeqColValue
-                   with SeqFilters[Int] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait BooleanSeqCol extends TypeCol[Seq[Boolean]] {
+  val conv = BooleanSeqConv
 }
 
-
-trait LongSeqCol extends LongSeqColValue
-                    with SeqFilters[Long] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait ShortSeqCol extends TypeCol[Seq[Short]] {
+  val conv = ShortSeqConv
 }
 
-
-trait FloatSeqCol extends FloatSeqColValue
-                     with SeqFilters[Float] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait IntSeqCol extends TypeCol[Seq[Int]] {
+  val conv = IntSeqConv
 }
 
-
-trait DoubleSeqCol extends DoubleSeqColValue
-                      with SeqFilters[Double] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait LongSeqCol extends TypeCol[Seq[Long]] {
+  val conv = LongSeqConv
 }
 
-
-trait BigDecimalSeqCol extends BigDecimalSeqColValue
-                          with SeqFilters[BigDecimal] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait FloatSeqCol extends TypeCol[Seq[Float]] {
+  val conv = FloatSeqConv
 }
 
-
-trait TimeSeqCol extends TimeSeqColValue
-                    with SeqFilters[Time] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait DoubleSeqCol extends TypeCol[Seq[Double]] {
+  val conv = DoubleSeqConv
 }
 
-
-trait DateSeqCol extends DateSeqColValue
-                    with SeqFilters[Date] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait BigDecimalSeqCol extends TypeCol[Seq[BigDecimal]] {
+  val conv = BigDecimalSeqConv
 }
 
-
-trait TimestampSeqCol extends TimestampSeqColValue
-                         with SeqFilters[Timestamp] {
-
-  val self = this
-  def asOpt = OptCol(this)
+trait TimeSeqCol extends TypeCol[Seq[Time]] {
+  val conv = TimeSeqConv
 }
 
+trait DateSeqCol extends TypeCol[Seq[Date]] {
+  val conv = DateSeqConv
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+trait TimestampSeqCol extends TypeCol[Seq[Timestamp]] {
+  val conv = TimestampSeqConv
+}
 

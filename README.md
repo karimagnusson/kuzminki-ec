@@ -9,11 +9,22 @@ Kuzminki is written for those who like SQL. Queries are written with the same lo
 This library is also available for [ZIO](https://zio.dev/) [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
 And for ZIO 2 [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
 
-See full documentation at [https://kuzminki.io/](https://kuzminki.io/0.9.4-RC1.html)
+See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
+
+Release 0.9.4-RC2 adds the following featurees:
+- Support for jsonb field
+- Support for uuid field
+- Support for transactions
+- Ability to use postgres functions
+- Improved ability to cache statements
+
+Attention! I am in some doubt as to whether to continue to maintain this version for Akka due to lack of interest. If you wish to see this project continue, you might want to give it a star or leave a comment by creating an issue.
+
+Attention! There are some changes to the API in this version. They affect INSERT, UPDATE and DELETE.
 
 #### Sbt
 ```sbt
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-akka" % "0.9.4-RC1"
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-akka" % "0.9.4-RC2"
 ```
 
 #### Example
@@ -42,7 +53,8 @@ object ExampleApp extends App {
     _ <- sql
       .insert(client)
       .cols2(t => (t.username, t.age))
-      .run(("Joe", 35))
+      .values(("Joe", 35))
+      .run
     
     _ <- sql
       .update(client)

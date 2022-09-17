@@ -17,18 +17,20 @@
 package kuzminki.insert
 
 import kuzminki.shape.{ParamConv, RowConv}
-import kuzminki.render.{
+import kuzminki.run.{
   RunQueryParams,
-  RunOperationParams,
+  RunOperationParams
+}
+import kuzminki.render.{
   RenderedQuery,
   RenderedOperation
 }
 
 
 class StoredInsert[P](
-    statement: String,
-    paramConv: ParamConv[P]
-  ) extends RunOperationParams[P] {
+  statement: String,
+  paramConv: ParamConv[P]
+) extends RunOperationParams[P] {
 
   def render(params: P) = {
     RenderedOperation(
@@ -37,18 +39,18 @@ class StoredInsert[P](
     )
   }
 
-  def debugSql(handler: String => Unit) = {
-    handler(statement)
+  def printSql = {
+    println(statement)
     this
   }
 }
 
 
 class StoredInsertReturning[P, R](
-    statement: String,
-    paramConv: ParamConv[P],
-    rowConv: RowConv[R]
-  ) extends RunQueryParams[P, R] {
+  statement: String,
+  paramConv: ParamConv[P],
+  rowConv: RowConv[R]
+) extends RunQueryParams[P, R] {
 
   def render(params: P) = {
     RenderedQuery(
@@ -58,8 +60,8 @@ class StoredInsertReturning[P, R](
     )
   }
 
-  def debugSql(handler: String => Unit) = {
-    handler(statement)
+  def printSql = {
+    println(statement)
     this
   }
 }

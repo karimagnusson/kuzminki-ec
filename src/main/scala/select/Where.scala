@@ -16,10 +16,17 @@
 
 package kuzminki.select
 
-import kuzminki.column.AnyCol
+import kuzminki.column.TypeCol
 import kuzminki.filter.Filter
 import kuzminki.section.Section
-import kuzminki.section.select.{WhereSec, WhereBlankSec, GroupBySec}
+import kuzminki.section.select.{
+  WhereSec,
+  WhereBlankSec,
+  SelectSec,
+  SelectDistinctSec,
+  SelectDistinctOnSec,
+  GroupBySec
+}
 
 
 class Where[M, R](
@@ -44,61 +51,65 @@ class Where[M, R](
     )
   }
 
-  @deprecated("use where", "0.9.2")
-  def whereOne(pick: M => Filter) = {
-    toOrderBy(
-      WhereSec(
-        Vector(pick(model))
-      )
-    )
-  }
-
-  def whereOpts(pick: M => Seq[Option[Filter]]) = {
+  def whereOpt(pick: M => Seq[Option[Filter]]) = {
     toOrderBy(
       pick(model).flatten match {
         case Nil =>
           WhereBlankSec
         case filters =>
-          WhereSec(pick(model).toVector.flatten)
-      }
-    )
-  }
-
-  def whereOpt(pick: M => Option[Filter]) = {
-    toOrderBy(
-      pick(model) match {
-        case Some(filter) =>
-          WhereSec(Vector(filter))
-        case None =>
-          WhereBlankSec
+          WhereSec(filters.toVector)
       }
     )
   }
 
   // group by
 
-  private def toHaving(cols: Vector[AnyCol]) = {
+  def groupBy(pick: M => Seq[TypeCol[_]]) = {
     new Having(
       model,
-      coll.add(GroupBySec(cols))
+      coll.add(
+        GroupBySec(pick(model).toVector)
+      )
     )
   }
 
-  @deprecated("use groupBy", "0.9.2")
-  def groupByOne(pick: M => AnyCol) = {
-    toHaving(
-      Vector(pick(model))
+  // distinct
+
+  def distinct = {
+    val sections = coll.sections.map {
+      case sec: SelectSec => SelectDistinctSec(sec.parts)
+      case sec => sec
+    }
+    new Where(
+      model,
+      SelectCollector(
+        coll.prefix,
+        coll.rowShape,
+        sections
+      )
     )
   }
 
-  def groupBy(pick: M => Seq[AnyCol]) = {
-    toHaving(pick(model).toVector)
+  def distinctOn(pick: M => Seq[TypeCol[_]]) = {
+    val picks = pick(model)
+    val sections = coll.sections.map {
+      case sec: SelectSec =>
+        SelectDistinctOnSec(
+          sec.parts.filter(p => picks.contains(p)),
+          sec.parts
+        )
+      case sec => sec
+    }
+    new Where(
+      model,
+      SelectCollector(
+        coll.prefix,
+        coll.rowShape,
+        sections
+      )
+    )
   }
 }
-
-
-
-
 
 
 

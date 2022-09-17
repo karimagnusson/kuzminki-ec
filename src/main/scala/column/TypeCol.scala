@@ -16,9 +16,16 @@
 
 package kuzminki.column
 
+import kuzminki.render.Renderable
 import kuzminki.conv.ValConv
+import kuzminki.sorting.{Asc, Desc}
 
-trait TypeCol[T] extends AnyCol {
+
+trait TypeCol[T] extends Renderable {
+  def name: String
   val conv: ValConv[T]
+  def asOpt = OptCol(this)
+  def asc = Asc(this)
+  def desc = Desc(this)
 }
 

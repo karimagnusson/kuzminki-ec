@@ -2,7 +2,7 @@ scalaVersion := "2.13.8"
 
 name := "kuzminki-akka"
 
-version := "0.9.4-RC1"
+version := "0.9.4-RC2"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
     name := "kuzminki-zio",
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % "2.13.8",
-      "com.typesafe.akka" %% "akka-actor" % "2.6.19",
+      "com.typesafe.akka" %% "akka-actor" % "2.6.20",
       "org.postgresql" % "postgresql" % "42.2.24",
       "com.zaxxer" % "HikariCP" % "4.0.3"
     )

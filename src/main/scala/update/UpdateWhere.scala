@@ -23,23 +23,11 @@ import kuzminki.filter.Filter
 
 
 class UpdateWhere[M](
-    model: M,
-    coll: SectionCollector
-  ) {
+  model: M,
+  coll: SectionCollector
+) {
 
-  def all() = new RenderUpdate(model, coll)
-
-  @deprecated("use where", "0.9.2")
-  def whereOne(pick: M => Filter) = {
-    new RenderUpdate(
-      model,
-      coll.add(
-        WhereSec(
-          Vector(pick(model))
-        )
-      )
-    )
-  }
+  def all = new RenderUpdate(model, coll)
 
   def where(pick: M => Seq[Filter]) = {
     pick(model) match {
@@ -53,29 +41,17 @@ class UpdateWhere[M](
     }
   }
 
-  def whereOpts(pick: M => Seq[Option[Filter]]) = {
+  def whereOpt(pick: M => Seq[Option[Filter]]) = {
     pick(model).flatten match {
       case Nil =>
         new RenderUpdate(model, coll)
       case filters =>
         new RenderUpdate(
           model,
-          coll.add(WhereSec(filters.toVector))
-        )
-    }
-  }
-
-  def whereOpt(pick: M => Option[Filter]) = {
-    pick(model) match {
-      case Some(filter) =>
-        new RenderUpdate(
-          model,
           coll.add(
-            WhereSec(Vector(filter))
+            WhereSec(filters.toVector)
           )
         )
-      case None =>
-        new RenderUpdate(model, coll)
     }
   }
 }

@@ -17,24 +17,47 @@
 package kuzminki.section
 
 import kuzminki.model.ModelTable
-import kuzminki.column.AnyCol
 import kuzminki.sorting.Sorting
 import kuzminki.render.{Renderable, Prefix, NoArgs}
+import kuzminki.api.KuzminkiError
 
 
 package object select extends FilterSections {
 
-  case class SelectSec(parts: Vector[AnyCol]) extends NotEmpty(parts) with MultiPartRender {
+  case class SelectSec(parts: Vector[Renderable]) extends NotEmpty(parts) with MultiPartRender {
     def error = "no columns selected"
     val expression = "SELECT %s"
     val glue = ", "
+  }
+
+  case class SelectDistinctSec(parts: Vector[Renderable]) extends NotEmpty(parts) with MultiPartRender {
+    def error = "no columns selected"
+    val expression = "SELECT DISTINCT %s"
+    val glue = ", "
+  }
+
+  case class SelectDistinctOnSec(distincts: Vector[Renderable], parts: Vector[Renderable]) extends Section {
+    def error = "no columns selected"
+    if (distincts.isEmpty) {
+      throw KuzminkiError(error)
+    }
+    if (parts.isEmpty) {
+      throw KuzminkiError(error)
+    }
+    val expression = "SELECT DISTINCT ON (%s) %s"
+    val glue = ", "
+    def render(prefix: Prefix) = expression.format(
+      distincts.map(_.render(prefix)).mkString(glue),
+      parts.map(_.render(prefix)).mkString(glue)
+    )
+    val args = distincts.map(_.args).flatten ++ parts.map(_.args).flatten
   }
 
   case class FromSec(part: ModelTable) extends SinglePartRender {
     val expression = "FROM %s"
   }
 
-  case class GroupBySec(parts: Vector[AnyCol]) extends NotEmpty(parts) with MultiPartRender {
+  case class GroupBySec(parts: Vector[Renderable]) extends NotEmpty(parts) with MultiPartRender {
     def error = "WHERE BY cannot be empty"
     val expression = "GROUP BY %s"
     val glue = ", "

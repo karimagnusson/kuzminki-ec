@@ -16,8 +16,6 @@
 
 package kuzminki.api
 
-import scala.util.{Try, Success, Failure}
-
 import kuzminki.api._
 import kuzminki.select.{
   Select,
@@ -29,6 +27,8 @@ import kuzminki.delete.{Delete, DeleteWhere}
 import kuzminki.insert.Insert
 import kuzminki.update.Update
 import kuzminki.fn.Count
+import kuzminki.render.RenderedOperation
+import kuzminki.run.Transaction
 
 
 object sql {
@@ -68,6 +68,10 @@ object sql {
   def delete[M <: Model](model: M): DeleteWhere[M] = {
     Delete.from(model)
   }
+
+  def transaction(stms: RenderedOperation*) = new Transaction(stms)
+
+  def transactionList(stms: Seq[RenderedOperation]) = new Transaction(stms)
 }
 
 

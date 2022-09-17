@@ -24,8 +24,8 @@ import kuzminki.section.operation.{UpdateSec, UpdateSetSec}
 
 
 class Update[M <: Model](
-    model: M
-  ) extends UpdateCacheSetMethods(model) {
+  model: M
+) extends PickUpdateSet(model) {
 
   def set(pick: M => Seq[Assign]) = {
     new UpdateWhere(
@@ -34,21 +34,6 @@ class Update[M <: Model](
         Vector(
           UpdateSec(ModelTable(model)),
           UpdateSetSec(pick(model).toVector)
-        )
-      )
-    )
-  }
-
-  @deprecated("use set", "0.9.2")
-  def setOne(pick: M => Assign) = {
-    new UpdateWhere(
-      model,
-      SectionCollector(
-        Vector(
-          UpdateSec(ModelTable(model)),
-          UpdateSetSec(
-            Vector(pick(model))
-          )
         )
       )
     )

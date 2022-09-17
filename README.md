@@ -11,7 +11,7 @@ And for ZIO 2 [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
 
 See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
-Release 0.9.4-RC2 adds the following featurees:
+Release 0.9.4-RC2 adds the following features:
 - Support for jsonb field
 - Support for uuid field
 - Support for transactions

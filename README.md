@@ -18,8 +18,6 @@ Release 0.9.4-RC2 adds the following features:
 - Ability to use postgres functions
 - Improved ability to cache statements
 
-Attention! I am in some doubt as to whether to continue to maintain this version for Akka due to lack of interest. If you wish to see this project continue, you might want to give it a star or leave a comment by creating an issue.
-
 Attention! There are some changes to the API in this version. They affect INSERT, UPDATE and DELETE.
 
 #### Sbt

@@ -12,7 +12,7 @@ See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
 Take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for an example of a REST API using this library and [Play](https://github.com/playframework/playframework).
 
-Release 0.9.4-RC4 adds the following features:
+Release 0.9.4-RC5 adds the following features:
 - Support for jsonb field
 - Support for transactions
 - Improved ability to cache statements

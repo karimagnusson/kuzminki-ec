@@ -11,19 +11,22 @@ And for ZIO 2 [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
 
 See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
-Release 0.9.4-RC2 adds the following features:
+Release 0.9.4-RC4 adds the following features:
 - Support for jsonb field
-- Support for uuid field
 - Support for transactions
-- Ability to use postgres functions
 - Improved ability to cache statements
-
-Attention! There are some changes to the API in this version. They affect INSERT, UPDATE and DELETE.
+- Select row as JSON string
+- Debug, print query
+- Insert, update null values
+- Timestamp, Date, Time methods
 
 #### Sbt
 ```sbt
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-akka" % "0.9.4-RC2"
+// compiled for Scala 2.13.8
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-ec" % "0.9.4-RC4"
 ```
+
+This version of the library can be used Akka but does not depend on it.
 
 #### Example
 ```scala
@@ -45,7 +48,10 @@ object ExampleApp extends App {
 
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
-  implicit val db = Kuzminki.create(DbConfig.forDb("company"))
+  implicit val db = Kuzminki.create(
+    DbConfig.forDb("company"),
+    system.dispatchers.lookup("kuzminki-dispatcher")
+  )
 
   val job = for {
     _ <- sql

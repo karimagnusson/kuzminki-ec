@@ -1,6 +1,6 @@
 scalaVersion := "2.13.8"
 
-name := "kuzminki-akka"
+name := "kuzminki-ec"
 
 version := "0.9.4-RC4"
 

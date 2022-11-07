@@ -10,7 +10,7 @@ And for ZIO 2, [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
 
 See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
-You can take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for a example of a REST API using this library and [Play](https://github.com/playframework/playframework).
+Take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for an example of a REST API using this library and [Play](https://github.com/playframework/playframework).
 
 Release 0.9.4-RC4 adds the following features:
 - Support for jsonb field

@@ -14,9 +14,12 @@
 * limitations under the License.
 */
 
-package kuzminki.section
+package kuzminki.render
+
+import kuzminki.api.Kuzminki
+import kuzminki.render.RenderedOperation
 
 
-sealed trait CacheArgs
-object CacheCondArgs extends CacheArgs
-object CacheOffsetArgs extends CacheArgs
+class Transaction(stms: Seq[RenderedOperation]) {
+  def run(implicit db: Kuzminki) = db.execList(stms)
+}

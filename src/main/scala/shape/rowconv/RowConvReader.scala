@@ -38,12 +38,22 @@ class RowConvReader[R](val cols: Vector[ValConv[_]])(implicit tag: ClassTag[R]) 
 
   def fromRow(rs: ResultSet) = {
     Try {
+
+      println("< --- >")
+
+      val res = read(rs)
+      println(res)
+
+      println(classTag[R].runtimeClass)
+      println(classTag[R].runtimeClass.getConstructors.head)
+
+      println("< --- >")
       
       classTag[R]
         .runtimeClass
         .getConstructors
         .head
-        .newInstance(read(rs): _*)
+        .newInstance(res: _*)
         .asInstanceOf[R]
     
     } match {

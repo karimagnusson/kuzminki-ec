@@ -25,18 +25,12 @@ object DbConfig {
 
 class DbConfig(val db: String) {
 
-  var dispatcher = "kuzminki-dispatcher"
-
   val props = new Properties()
   props.setProperty("dataSourceClassName", "org.postgresql.ds.PGSimpleDataSource")
   props.setProperty("dataSource.databaseName", db)
   props.setProperty("dataSource.serverName", "localhost")
   props.setProperty("dataSource.portNumber", "5432")
-
-  def withDispatcher(value: String) = {
-    dispatcher = value
-    this
-  }
+  props.setProperty("maximumPoolSize", "10")
 
   def withUser(value: String) = {
     props.setProperty("dataSource.user", value)
@@ -53,8 +47,13 @@ class DbConfig(val db: String) {
     this
   }
 
-  def withPort(value: String) = {
-    props.setProperty("dataSource.portNumber", value)
+  def withPort(value: Int) = {
+    props.setProperty("dataSource.portNumber", value.toString)
+    this
+  }
+
+  def withPoolSize(value: Int) = {
+    props.setProperty("maximumPoolSize", value.toString)
     this
   }
 

@@ -18,7 +18,7 @@ package kuzminki.run
 
 import kuzminki.api.Kuzminki
 import kuzminki.shape.ParamConv
-import kuzminki.render.RenderedOperation
+import kuzminki.render.{RenderedOperation, JoinArgs}
 
 
 trait RunOperation {
@@ -33,7 +33,9 @@ trait RunOperation {
 }
 
 
-trait RunOperationParams[P] {
+trait RunOperationParams[P] extends JoinArgs {
+
+  val statement: String
 
   def render(params: P): RenderedOperation
 

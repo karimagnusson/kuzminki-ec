@@ -14,12 +14,12 @@
 * limitations under the License.
 */
 
-package kuzminki.select
+package kuzminki.assign
 
 import kuzminki.render.{Renderable, Prefix}
 
 
-class SelectSubquery[R](coll: SelectCollector[R]) extends Renderable {
-  def render(prefix: Prefix) = coll.render
-  val args = coll.args
+case class ValueEq(col: Renderable, value: Any) extends Renderable {
+  def render(prefix: Prefix) = "%s = ?".format(col.render(prefix))
+  val args = Vector(value)
 }

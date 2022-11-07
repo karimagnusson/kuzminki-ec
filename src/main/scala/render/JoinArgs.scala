@@ -14,52 +14,25 @@
 * limitations under the License.
 */
 
-package kuzminki.select
+package kuzminki.render
 
-import kuzminki.run.RunQueryParams
-import kuzminki.render.RenderedQuery
-import kuzminki.shape.ParamConv
-import kuzminki.shape.RowConv
+import kuzminki.api.CacheArg
 
 
-class StoredSelectCondition[P, R](
-    statement: String,
-    cacheArgs: Tuple2[Vector[Any], Vector[Any]],
-    paramConv: ParamConv[P],
-    rowConv: RowConv[R]
-  ) extends RunQueryParams[P, R] {
+trait JoinArgs {
 
-  def render(params: P) = {
-    RenderedQuery(
-      statement,
-      cacheArgs._1 ++ paramConv.fromShape(params) ++ cacheArgs._2,
-      rowConv
-    )
-  }
+  def joinArgs(args: Vector[Any], cacheArgs: Vector[Any]) = {
+    
+    var index = 0
 
-  def printSql = {
-    println(statement)
-    this
+    val cacheReplace: Any => Any = {
+      case CacheArg =>
+        val arg = cacheArgs(index)
+        index = index + 1
+        arg
+      case arg => arg
+    }
+
+    args.map(cacheReplace)
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

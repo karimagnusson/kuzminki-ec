@@ -14,15 +14,10 @@
 * limitations under the License.
 */
 
-package kuzminki.shape
-
-import kuzminki.column.TypeCol
+package kuzminki.conv
 
 
-class RowShapeType[R](
-    val cols: Vector[TypeCol[_]],
-        typeReader: TypeReader[R]
-  ) extends RowShape[R] {
+sealed trait TypePg
+case class TypeNull(typeId: Int) extends TypePg
+case class TypeArray(typeName: String, vec: Seq[Object]) extends TypePg
 
-  val conv = new RowConvType(typeReader)
-}

@@ -17,10 +17,12 @@
 package kuzminki.column
 
 import kuzminki.conv.ValOptConv
+import kuzminki.assign.SetValue
 import kuzminki.render.SubRenderAndArgs
 
 case class OptCol[T](col: TypeCol[T]) extends TypeCol[Option[T]] with SubRenderAndArgs {
+  val conv = col.conv.opt
   def name = col.name
-  val conv = ValOptConv(col.conv)
+  def ==>(value: Option[T]) = SetValue(col, conv.put(value))
 }
 

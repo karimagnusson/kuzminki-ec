@@ -14,11 +14,35 @@
 * limitations under the License.
 */
 
-package kuzminki.shape
+package kuzminki.filter
 
-import java.sql.ResultSet
+import kuzminki.column.TypeCol
 
 
-class RowConvType[R](typeReader: TypeReader[R]) extends RowConv[R] {
-  def fromRow(rs: ResultSet) = typeReader.read(rs)
+trait BooleanMethods extends TypeMethods[Boolean] {
+  def use = BooleanCache(col)
 }
+
+case class BooleanCache(col: TypeCol[Boolean]) extends TypeCache[Boolean]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

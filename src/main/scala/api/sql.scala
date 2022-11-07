@@ -27,8 +27,7 @@ import kuzminki.delete.{Delete, DeleteWhere}
 import kuzminki.insert.Insert
 import kuzminki.update.Update
 import kuzminki.fn.Count
-import kuzminki.render.RenderedOperation
-import kuzminki.run.Transaction
+import kuzminki.render.{Transaction, RenderedOperation}
 
 
 object sql {

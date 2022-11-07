@@ -1,5 +1,5 @@
 [![license](https://img.shields.io/github/license/rdbc-io/rdbc.svg?style=flat-square)](https://github.com/rdbc-io/rdbc/blob/master/LICENSE)
-# kuzminki-akka
+# kuzminki-ec
 
 Kuzminki is query builder and access library for PostgreSQL written in Scala.
 This version is for Akka.

@@ -14,19 +14,29 @@
 * limitations under the License.
 */
 
-package kuzminki.assign
+package kuzminki.select
 
-import kuzminki.column.{TypeCol, ModelCol}
-import kuzminki.render.{Renderable, Prefix, NoArgs}
-import kuzminki.api.KuzminkiError
+import kuzminki.shape._
 
 
-case class SetUpsert(col: TypeCol[_]) extends Renderable with NoArgs {
-  def render(prefix: Prefix) = "%s = ?".format(col.render(prefix))
-  col match {
-    case col: ModelCol =>
-    case _ => throw KuzminkiError("cannot upsert a function") 
-  }
+abstract class SelectCache[P, R](
+  coll: SelectCollector[R],
+  partShape: PartShape[P]
+) {
+  def cache = coll.renderCache(partShape)
+  def asSubqueryInsertFc = coll.asSubqueryInsertFc(partShape)
+}
+
+class SelectCacheMultiple[P, R](
+  coll: SelectCollector[R],
+  partShape: PartShape[P]
+) extends SelectCache(coll, partShape)
+
+class SelectCacheSingle[P, R](
+  coll: SelectCollector[R],
+  partShape: PartShapeSingle[P]
+) extends SelectCache(coll, partShape) {
+  def asSubqueryInFc = coll.asSubqueryInFc(partShape)
 }
 
 

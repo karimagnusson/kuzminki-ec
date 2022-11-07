@@ -14,48 +14,20 @@
 * limitations under the License.
 */
 
-package kuzminki.render
-
-import kuzminki.section.Section
-import kuzminki.section.select.{WhereBlankSec, HavingBlankSec}
+package kuzminki.api
 
 
-trait RenderCollector {
-  val sections: Vector[Section]
-  val prefix: Prefix
+sealed trait Arg
+case object Arg extends Arg
 
-  val notBlank: Section => Boolean = {
-    case WhereBlankSec => false
-    case HavingBlankSec => false
-    case _ => true
-  }
+sealed trait ArgSeq
+case object ArgSeq extends ArgSeq
 
-  def render = sections.filter(notBlank).map(_.render(prefix)).mkString(" ")
-  
-  val args = sections.toSeq.map(_.args).flatten.toVector
-}
+sealed trait ArgInt
+case object ArgInt extends ArgInt
 
+sealed trait NoArg
+case object NoArg extends NoArg
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+sealed trait CacheArg
+case object CacheArg extends Arg

@@ -16,116 +16,34 @@
 
 package kuzminki.insert
 
-import kuzminki.api.Model
+import kuzminki.api.{Model, CacheArg}
 import kuzminki.column.{ModelCol, TypeCol}
-import kuzminki.assign.SetValue
+import kuzminki.assign.ValueEq
 import kuzminki.api.KuzminkiError
-import kuzminki.section.select.WhereSec
-import kuzminki.select.SelectSubquery
-import kuzminki.assign.SetUpsert
+import kuzminki.section.WhereSec
+import kuzminki.select._
 import kuzminki.model.ModelTable
 import kuzminki.shape.ParamShape
-import kuzminki.section.insert._
-import kuzminki.render.SectionCollector
-import kuzminki.filter.types.FilterMatchesNoArg
+import kuzminki.section._
+import kuzminki.render.{Prefix, Renderable, SectionCollector}
 
 
 case class InsertBuilder[M <: Model, P](
   model: M,
   paramShape: ParamShape[P]
-) {
+) extends BuilderMethods[M] {
 
   val cols = paramShape.cols
+  def values = Vector.fill(paramShape.size)(CacheArg)
 
   def toValuesBuilder(params: P) =
     ValuesBuilder(model, cols, paramShape.conv.fromShape(params))
-
-  def collector = {
-    SectionCollector(Vector(
-      InsertIntoSec(ModelTable(model)),
-      InsertColumnsSec(cols),
-      InsertBlankValuesSec(cols),
-    ))
-  }
-
-  def returning(returningCols: Vector[TypeCol[_]]) = {
-    SectionCollector(Vector(
-      InsertIntoSec(ModelTable(model)),
-      InsertColumnsSec(cols),
-      InsertBlankValuesSec(cols),
-      ReturningSec(returningCols)
-    ))
-  }
-
-  def fromSelect[P](sub: SelectSubquery[P]) = {
-    SectionCollector(Vector(
-      InsertIntoSec(ModelTable(model)),
-      InsertColumnsSec(cols),
-      InsertSubquerySec(sub)
-    ))
-  }
-
-  def cacheBlank = {
-    SectionCollector(Vector(
-      InsertIntoSec(ModelTable(model)),
-      InsertColumnsSec(cols),
-      InsertBlankValuesSec(cols)
-    ))
-  }
-
-  def whereNotExists(uniqueCols: Vector[TypeCol[_]]) = {
-    SectionCollector(Vector(
-      InsertIntoSec(ModelTable(model)),
-      InsertColumnsSec(cols),
-      InsertWhereNotExistsSec(
-        cols,
-        ModelTable(model),
-        WhereSec(
-          uniqueCols.map(FilterMatchesNoArg(_))
-        )
-      )
-    ))
-  }
 
   def whereNotExistsReuse(uniqueCols: Vector[TypeCol[_]]) = {
     new ParamConvReuse(
       paramShape.conv,
       Reuse.fromIndex(cols, uniqueCols)
     )
-  }
-
-  def onConflictDoNothing = {
-    SectionCollector(Vector(
-      InsertIntoSec(ModelTable(model)),
-      InsertColumnsSec(cols),
-      InsertBlankValuesSec(cols),
-      InsertOnConflictSec,
-      InsertDoNothingSec
-    ))
-  }
-
-  def onConflictColDoNothing(conflictCol: TypeCol[_]) = {
-    SectionCollector(Vector(
-      InsertIntoSec(ModelTable(model)),
-      InsertColumnsSec(cols),
-      InsertBlankValuesSec(cols),
-      InsertOnConflictColumnSec(conflictCol),
-      InsertDoNothingSec
-    ))
-  }
-
-  def onConflictColDoUpdate(
-    conflictCol: TypeCol[_],
-    updateCols: Vector[TypeCol[_]]
-  ) = {
-    ValidateDoUpdate.run(conflictCol, updateCols)
-    SectionCollector(Vector(
-      InsertIntoSec(ModelTable(model)),
-      InsertColumnsSec(cols),
-      InsertBlankValuesSec(cols),
-      InsertOnConflictColumnSec(conflictCol),
-      InsertDoUpdateNoArgsSec(updateCols.map(SetUpsert(_)))
-    ))
   }
 
   def onConflictColDoUpdateReuse(updateCols: Vector[TypeCol[_]]) = {
@@ -139,12 +57,20 @@ case class InsertBuilder[M <: Model, P](
 
 case class ValuesBuilder[M <: Model](
   model: M,
-  cols: Vector[TypeCol[_]],
+  cols: Vector[Renderable],
   values: Vector[Any]
-) {
+) extends BuilderMethods[M]
+
+
+trait BuilderMethods[M <: Model] {
+
+  val model: M
+  val cols: Vector[Renderable]
+  def values: Vector[Any]
+  val prefix = Prefix.forModel(model)
 
   def collector = {
-    SectionCollector(Vector(
+    SectionCollector(prefix, Vector(
       InsertIntoSec(ModelTable(model)),
       InsertColumnsSec(cols),
       InsertValuesSec(values),
@@ -152,7 +78,7 @@ case class ValuesBuilder[M <: Model](
   }
 
   def returning(returningCols: Vector[TypeCol[_]]) = {
-    SectionCollector(Vector(
+    SectionCollector(prefix, Vector(
       InsertIntoSec(ModelTable(model)),
       InsertColumnsSec(cols),
       InsertValuesSec(values),
@@ -160,29 +86,36 @@ case class ValuesBuilder[M <: Model](
     ))
   }
 
+  def fromSelect(sub: Renderable) = {
+    SectionCollector(prefix, Vector(
+      InsertIntoSec(ModelTable(model)),
+      InsertColumnsSec(cols),
+      InsertSubquerySec(sub)
+    ))
+  }
+
+  def cacheBlank = {
+    SectionCollector(prefix, Vector(
+      InsertIntoSec(ModelTable(model)),
+      InsertColumnsSec(cols),
+      InsertValuesSec(values)
+    ))
+  }
+
   def whereNotExists(uniqueCols: Vector[TypeCol[_]]) = {
-    val colValue = (cols zip values).toMap
-    val conds = uniqueCols.map { col =>
-      colValue.get(col) match {
-        case Some(value) => SetValue(col, value)
-        case None => throw KuzminkiError(
-          s"column [${col.name}] must be an insert column to do upsert"
-        )
-      }
-    }
-    SectionCollector(Vector(
+    SectionCollector(prefix, Vector(
       InsertIntoSec(ModelTable(model)),
       InsertColumnsSec(cols),
       InsertWhereNotExistsSec(
         values,
         ModelTable(model),
-        WhereSec(conds.toVector)
+        WhereSec(conditional(uniqueCols))
       )
     ))
   }
 
   def onConflictDoNothing = {
-    SectionCollector(Vector(
+    SectionCollector(prefix, Vector(
       InsertIntoSec(ModelTable(model)),
       InsertColumnsSec(cols),
       InsertValuesSec(values),
@@ -192,7 +125,7 @@ case class ValuesBuilder[M <: Model](
   }
 
   def onConflictColDoNothing(conflictCol: TypeCol[_]) = {
-    SectionCollector(Vector(
+    SectionCollector(prefix, Vector(
       InsertIntoSec(ModelTable(model)),
       InsertColumnsSec(cols),
       InsertValuesSec(values),
@@ -201,35 +134,18 @@ case class ValuesBuilder[M <: Model](
     ))
   }
 
-  def onConflictColDoUpdate(
-    conflictCol: TypeCol[_],
-    updateCols: Vector[TypeCol[_]]
-  ) = {
-    ValidateDoUpdate.run(conflictCol, updateCols)
-    val colValue = (cols zip values).toMap
-    val upserts = updateCols.map { col => 
-      colValue.get(col) match {
-        case Some(value) => SetValue(col, value)
-        case None => throw KuzminkiError(
-          s"column [${col.name}] must be an insert column to do upsert"
-        )
-      }
-    }
-    SectionCollector(Vector(
+  def onConflictColDoUpdate(conflictCol: TypeCol[_], updateCols: Vector[TypeCol[_]]) = {
+    SectionCollector(prefix, Vector(
       InsertIntoSec(ModelTable(model)),
       InsertColumnsSec(cols),
       InsertValuesSec(values),
       InsertOnConflictColumnSec(conflictCol),
-      InsertDoUpdateSec(upserts)
+      InsertDoUpdateSec(upsert(conflictCol, updateCols))
     ))
   }
-}
 
-
-object ValidateDoUpdate {
-
-  def run(conflictCol: TypeCol[_], updateCols: Vector[TypeCol[_]]): Unit = {
-
+  private def upsert(conflictCol: TypeCol[_], updateCols: Vector[TypeCol[_]]) = {
+    
     updateCols.map {
       case col: ModelCol =>
       case _ => throw KuzminkiError("update columns cannot be a function")
@@ -242,14 +158,42 @@ object ValidateDoUpdate {
     if (updateCols.contains(conflictCol)) {
       throw KuzminkiError("cannot update the conflicting column")
     }
+
+    val colValue = (cols zip values).toMap
+    
+    updateCols.map { col => 
+      colValue.get(col) match {
+        case Some(value) => ValueEq(col, value)
+        case None => throw KuzminkiError(
+          s"column must be an insert column to do upsert"
+        )
+      }
+    }
+  }
+
+  private def conditional(uniqueCols: Vector[TypeCol[_]]) = {
+    
+    uniqueCols.map {
+      case col: ModelCol =>
+      case _ => throw KuzminkiError("update columns cannot be a function")
+    }
+
+    if (uniqueCols.isEmpty) {
+      throw KuzminkiError("no update columns selected")
+    }
+
+    val colValue = (cols zip values).toMap
+    
+    uniqueCols.map { col => 
+      colValue.get(col) match {
+        case Some(value) => ValueEq(col, value)
+        case None => throw KuzminkiError(
+          s"column must be an insert column to do upsert"
+        )
+      }
+    }
   }
 }
-
-
-
-
-
-
 
 
 

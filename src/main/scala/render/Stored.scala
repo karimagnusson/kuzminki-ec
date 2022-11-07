@@ -14,26 +14,39 @@
 * limitations under the License.
 */
 
-package kuzminki.section
+package kuzminki.render
 
-import kuzminki.column.TypeCol
+import kuzminki.run.{RunQuery, RunOperation}
+import kuzminki.render.{
+  RenderedOperation,
+  RenderedQuery
+}
+import kuzminki.shape.RowConv
 
 
-trait ReturningSections {
+class StoredQuery[R](
+    val statement: String,
+    args: Vector[Any],
+    rowConv: RowConv[R]
+  ) extends RunQuery[R] {
 
-  case class ReturningSec(parts: Vector[TypeCol[_]]) extends MultiPartRender {
-    val expression = "RETURNING %s"
-    val glue = ", "
-  }
+  def render = RenderedQuery(
+    statement,
+    args,
+    rowConv
+  )
 }
 
+class StoredOperation[R](
+    val statement: String,
+    args: Vector[Any],
+  ) extends RunOperation {
 
-
-
-
-
-
-
+  def render = RenderedOperation(
+    statement,
+    args
+  )
+}
 
 
 

@@ -21,8 +21,10 @@ import kuzminki.render.Prefix
 import kuzminki.column.TypeCol
 import kuzminki.fn.aggFn.AggFn
 import kuzminki.run.RunQuery
-import kuzminki.render.RenderedQuery
-import kuzminki.section.select._
+import kuzminki.shape.RowShapeSingle
+import kuzminki.shape.CachePart.seqConv
+import kuzminki.section._
+import kuzminki.render._
 
 
 class RenderSelect[M, R](
@@ -31,9 +33,30 @@ class RenderSelect[M, R](
   ) extends SelectCacheMethods(model, coll)
        with RunQuery[R] {
 
-  def render = RenderedQuery(coll.render, coll.args, coll.rowShape.conv)
+  def render = RenderedQuery(
+    coll.render,
+    coll.args,
+    coll.rowShape.conv
+  )
+
+  def cache = new StoredQuery(
+    coll.render,
+    coll.args,
+    coll.rowShape.conv
+  )
 
   // subquery
+
+  def asSubquery = new Subquery(coll)
+
+  def asColumn = {
+    coll.rowShape match {
+      case shape: RowShapeSingle[_] =>
+        new SubqueryCol(coll, shape.col.conv)
+      case _ =>
+        throw KuzminkiError("Subquery is invalid")
+    }
+  }
 
   private def firstColumn = {
     coll.sections(0) match {
@@ -44,16 +67,6 @@ class RenderSelect[M, R](
     }
   }
   
-  def asSubquery = {
-    firstColumn match {
-      case col: TypeCol[_] =>
-      case _ =>
-        throw KuzminkiError("Subquery column cannot use modifiers")
-    }
-
-    new SelectSubquery(coll)
-  }
-  
   def asAggregation = {
     firstColumn match {
       case col: AggFn =>
@@ -62,11 +75,6 @@ class RenderSelect[M, R](
     }
 
     new AggregationSubquery(coll)
-  }
-
-  def printSql = {
-    println(render.statement)
-    this
   }
 }
 

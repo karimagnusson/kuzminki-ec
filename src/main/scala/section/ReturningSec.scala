@@ -14,12 +14,41 @@
 * limitations under the License.
 */
 
-package kuzminki.run
+package kuzminki.section
 
-import kuzminki.api.Kuzminki
-import kuzminki.render.RenderedOperation
+import kuzminki.render.Renderable
 
 
-class Transaction(stms: Seq[RenderedOperation]) {
-  def run(implicit db: Kuzminki) = db.execList(stms)
+case class ReturningSec(parts: Vector[Renderable]) extends MultiPartRender {
+  val expression = "RETURNING %s"
+  val glue = ", "
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

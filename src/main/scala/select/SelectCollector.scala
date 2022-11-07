@@ -17,126 +17,72 @@
 package kuzminki.select
 
 import kuzminki.api.KuzminkiError
-import kuzminki.render.{RenderCollector, RenderedQuery, Prefix}
+import kuzminki.render.{RenderedQuery, Prefix}
 import kuzminki.section._
-import kuzminki.section.select._
 import kuzminki.shape._
 
 
 case class SelectCollector[R](
-    prefix: Prefix,
-    rowShape: RowShape[R],
-    sections: Vector[Section]
-  ) extends RenderCollector {
+  prefix: Prefix,
+  rowShape: RowShape[R],
+  sections: Vector[Section]
+) {
 
   def add(section: Section) = this.copy(sections = sections :+ section)
 
   def extend(added: Vector[Section]) = this.copy(sections = sections ++ added)
 
-  private def validataWhere(): Unit = {
-    
-    sections.foreach {
-    
-      case HavingSec(_) =>
-        throw KuzminkiError("HAVING is defined in query")
-    
-      case HavingBlankSec =>
-        throw KuzminkiError("HAVING is defined in query")
-    
-      case _ =>
-    }
+  val notBlank: Section => Boolean = {
+    case WhereBlankSec => false
+    case HavingBlankSec => false
+    case _ => true
   }
 
-  private def validataHaving(): Unit = {
-   
-    sections.foreach {
-   
-      case WhereSec(_) =>
-        throw KuzminkiError("WHERE is defined in query")
-   
-      case WhereBlankSec =>
-        throw KuzminkiError("WHERE is defined in query")
-   
-      case _ =>
-    }
-  }
-
-  private def replaceWhereSec[P](modifiedSections: Vector[Section], partShape: PartShape[P]) = {
-
-    modifiedSections.map {
+  private def replaceBlank[P](partShape: PartShape[P]) = sections.map {
       
-      case WhereBlankSec =>
-        WhereCacheSec(partShape.parts)
-      
-      case WhereSec(conds) =>
-        WhereMixedSec(conds, partShape.parts)
-      
-      case section: Section =>
-        section
-    }
-  }
-
-  private def replaceHavingSec[P](modifiedSections: Vector[Section], partShape: PartShape[P]) = {
-
-    modifiedSections.map {
-      
-      case HavingBlankSec =>
-        HavingCacheSec(partShape.parts)
-      
-      case HavingSec(conds) =>
-        HavingMixedSec(conds, partShape.parts)
-      
-      case section: Section =>
-        section
-    }
-  }
-
-  private def argSplit(args: Vector[Any], splitter: CacheArgs) = {
-
-    val index = args.indexOf(splitter)
-    val count = args.count(_ == splitter)
-
-    if (count != 1) {
-      throw KuzminkiError("Invalid query")
-    }
-
-    args.splitAt(index) match {
-      case (args1, args2) =>
-        (args1, args2.tail)
-    }
-  }
-
-  private def renderForCache[P](modifiedSections: Vector[Section]) = {
+    case WhereBlankSec =>
+      WhereSec(partShape.parts)
     
-    val template = modifiedSections.map(_.render(prefix)).mkString(" ")
-    
-    val args = modifiedSections.map(_.args).flatten.toVector
+    case WhereSec(conds) =>
+      WhereSec(conds ++ partShape.parts)
 
-    val argParts = argSplit(args, CacheCondArgs)
+    case HavingBlankSec =>
+      HavingSec(partShape.parts)
     
-    (template, argParts)
+    case HavingSec(conds) =>
+      HavingSec(conds ++ partShape.parts)
+    
+    case section: Section =>
+      section
   }
 
-  def cacheWhere[P](partShape: PartShape[P]) = {
+  def render = sections.filter(notBlank).map(_.render(prefix)).mkString(" ")
+  
+  def args = sections.map(_.args).flatten.toVector
 
-    validataWhere()
-
-    val sectionsWithWhere = replaceWhereSec(sections, partShape)
-
-    val (template, args) = renderForCache(sectionsWithWhere)
-
-    new StoredSelectCondition(template, args, partShape.conv, rowShape.conv)
+  def renderCache[P](partShape: PartShape[P]) = {
+    val modifiedSections = replaceBlank(partShape)
+    new StoredSelect(
+      modifiedSections.map(_.render(prefix)).mkString(" "),
+      modifiedSections.map(_.args).flatten,
+      partShape.conv,
+      rowShape.conv
+    )
   }
 
-  def cacheHaving[P](partShape: PartShape[P]) = {
+  // subquery
 
-    validataHaving()
+  def renderSubquery(parPrefix: Prefix) = {
+    val subPrefix = prefix.forSubquery(parPrefix)
+    sections.filter(notBlank).map(_.render(subPrefix)).mkString(" ")
+  }
 
-    val sectionsWithHaving = replaceHavingSec(sections, partShape)
+  def asSubqueryInsertFc[P](partShape: PartShape[P]) = {
+    SubqueryInsertFc(prefix, replaceBlank(partShape), partShape.conv, rowShape)
+  }
 
-    val (template, args) = renderForCache(sectionsWithHaving)
-
-    new StoredSelectCondition(template, args, partShape.conv, rowShape.conv)
+  def asSubqueryInFc[P](partShape: PartShapeSingle[P]) = {
+    SubqueryInFc(prefix, replaceBlank(partShape), partShape.cond.conv, rowShape)
   }
 }
 

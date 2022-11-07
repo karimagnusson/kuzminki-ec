@@ -14,11 +14,50 @@
 * limitations under the License.
 */
 
-package kuzminki.filter.types
+package kuzminki.select
 
-import kuzminki.column.TypeCol
-
-
-case class FilterMatchesNoArg[T](col: TypeCol[T]) extends NoArgFilter {
-  val template = "%s = ?"
+import kuzminki.run.{RunQuery, RunQueryParams}
+import kuzminki.render.{
+  RenderedOperation,
+  RenderedQuery
 }
+import kuzminki.shape.{
+  ParamConv,
+  RowConv
+}
+
+
+class StoredSelect[P, R](
+    val statement: String,
+    args: Vector[Any],
+    paramConv: ParamConv[P],
+    rowConv: RowConv[R]
+  ) extends RunQueryParams[P, R] {
+
+  def render(params: P) = RenderedQuery(
+    statement,
+    joinArgs(args, paramConv.fromShape(params)),
+    rowConv
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

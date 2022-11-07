@@ -16,41 +16,60 @@
 
 package kuzminki.filter.types
 
+import kuzminki.filter.Filter
 import kuzminki.column.TypeCol
 import kuzminki.conv.ValConv
-import kuzminki.render.Renderable
+import kuzminki.render.{Renderable, Prefix}
 
 
-case class FilterGt[T](col: TypeCol[T], arg: Any) extends SingleArgFilter {
+case class FilterGt(col: Renderable, arg: Any) extends ArgFilter {
   val template = "%s > ?"
 }
 
-case class FilterLt[T](col: TypeCol[T], arg: Any) extends SingleArgFilter {
+case class FilterLt(col: Renderable, arg: Any) extends ArgFilter {
   val template = "%s < ?"
 }
 
-case class FilterGte[T](col: TypeCol[T], arg: Any) extends SingleArgFilter {
+case class FilterGte(col: Renderable, arg: Any) extends ArgFilter {
   val template = "%s >= ?"
 }
 
-case class FilterLte[T](col: TypeCol[T], arg: Any) extends SingleArgFilter {
+case class FilterLte(col: Renderable, arg: Any) extends ArgFilter {
+  val template = "%s <= ?"
+}
+
+// col filters
+
+case class FilterColGt(col: Renderable, col2: Renderable) extends ColFilter {
+  val template = "%s > ?"
+}
+
+case class FilterColLt(col: Renderable, col2: Renderable) extends ColFilter {
+  val template = "%s < ?"
+}
+
+case class FilterColGte(col: Renderable, col2: Renderable) extends ColFilter {
+  val template = "%s >= ?"
+}
+
+case class FilterColLte(col: Renderable, col2: Renderable) extends ColFilter {
   val template = "%s <= ?"
 }
 
 // cache
 
-case class CacheGt[P](col: Renderable, conv: ValConv[P]) extends CacheFilter[P] {
+case class CacheGt[P](col: Renderable, conv: ValConv[P]) extends CacheFilterCol[P] {
   val template = "%s > ?"
 }
 
-case class CacheLt[P](col: Renderable, conv: ValConv[P]) extends CacheFilter[P] {
+case class CacheLt[P](col: Renderable, conv: ValConv[P]) extends CacheFilterCol[P] {
   val template = "%s < ?"
 }
 
-case class CacheGte[P](col: Renderable, conv: ValConv[P]) extends CacheFilter[P] {
+case class CacheGte[P](col: Renderable, conv: ValConv[P]) extends CacheFilterCol[P] {
   val template = "%s >= ?"
 }
 
-case class CacheLte[P](col: Renderable, conv: ValConv[P]) extends CacheFilter[P] {
+case class CacheLte[P](col: Renderable, conv: ValConv[P]) extends CacheFilterCol[P] {
   val template = "%s <= ?"
 }

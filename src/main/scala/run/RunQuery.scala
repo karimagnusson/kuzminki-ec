@@ -17,7 +17,7 @@
 package kuzminki.run
 
 import kuzminki.api.Kuzminki
-import kuzminki.render.RenderedQuery
+import kuzminki.render.{RenderedQuery, JoinArgs}
 
 
 trait RunQuery[R] {
@@ -44,7 +44,9 @@ trait RunQuery[R] {
 }
 
 
-trait RunQueryParams[P, R] {
+trait RunQueryParams[P, R] extends JoinArgs {
+
+  val statement: String
 
   def render(params: P): RenderedQuery[R]
 
@@ -66,8 +68,6 @@ trait RunQueryParams[P, R] {
   def runHeadOptAs[T](params: P)(implicit transform: R => T, db: Kuzminki) =
     db.queryHeadOptAs(render(params), transform)
 }
-
-
 
 
 

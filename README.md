@@ -2,7 +2,6 @@
 # kuzminki-ec
 
 Kuzminki is query builder and access library for PostgreSQL written in Scala.
-This version is for Akka.
 
 Kuzminki is written for those who like SQL. Queries are written with the same logic you write SQL statements. As a result the code is easy to read and memorise while the resulting SQL statement is predictable.
 

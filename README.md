@@ -5,10 +5,12 @@ Kuzminki is query builder and access library for PostgreSQL written in Scala.
 
 Kuzminki is written for those who like SQL. Queries are written with the same logic you write SQL statements. As a result the code is easy to read and memorise while the resulting SQL statement is predictable.
 
-This library is also available for [ZIO](https://zio.dev/) [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
-And for ZIO 2 [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
+This library is also available for [ZIO](https://zio.dev/), [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
+And for ZIO 2, [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
 
 See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
+
+You can take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for a example of a REST API using this library and [Play](https://github.com/playframework/playframework).
 
 Release 0.9.4-RC4 adds the following features:
 - Support for jsonb field
@@ -22,7 +24,7 @@ Release 0.9.4-RC4 adds the following features:
 #### Sbt
 ```sbt
 // compiled for Scala 2.13.8
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-ec" % "0.9.4-RC4"
+libraryDependencies += "io.github.karimagnusson" % "kuzminki-ec" % "0.9.4-RC5"
 ```
 
 This version of the library can be used Akka but does not depend on it.

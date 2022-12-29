@@ -14,7 +14,7 @@ Features:
 - Support for sub-queries
 - Support for transactions
 
-This version relies only on Scala ExecutionContext.
+This version relies only on Scala ExecutionContext.  
 This library is also available for ZIO 1, [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
 And for ZIO 2, [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
 

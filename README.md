@@ -1,5 +1,7 @@
-[![Twitter Follow](https://img.shields.io/twitter/follow/kuzminki_lib?label=follow&style=flat&logo=twitter&color=brightgreen)](https://twitter.com/kuzminki_lib)
-[![license](https://img.shields.io/github/license/rdbc-io/rdbc.svg?style=flat)](https://github.com/rdbc-io/rdbc/blob/master/LICENSE)
+| Twitter |
+| --- |
+| [![Twitter Follow](https://img.shields.io/twitter/follow/kuzminki_lib?label=follow&style=flat&logo=twitter&color=brightgreen)](https://twitter.com/kuzminki_lib) |
+
 # kuzminki-ec
 
 Kuzminki is feature-rich query builder and access library for PostgreSQL written in Scala.

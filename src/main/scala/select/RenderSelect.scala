@@ -45,6 +45,8 @@ class RenderSelect[M, R](
     coll.rowShape.conv
   )
 
+  def asPages(size: Int) = Pages(render, size)
+
   // subquery
 
   def asSubquery = new Subquery(coll)

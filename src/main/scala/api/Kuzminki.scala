@@ -41,6 +41,8 @@ object Kuzminki {
 
 trait Kuzminki {
 
+  def getEc: ExecutionContext
+
   def query[R](render: => RenderedQuery[R]): Future[List[R]]
 
   def queryAs[R, T](render: => RenderedQuery[R], transform: R => T): Future[List[T]]
@@ -65,6 +67,8 @@ trait Kuzminki {
 
 private class DefaultApi(conf: DbConfig, dbContext: ExecutionContext)
                         (implicit ec: ExecutionContext) extends Kuzminki {
+
+  def getEc = ec
 
   val pool = new JdbcExecutor(
     new HikariDataSource(new HikariConfig(conf.props)),

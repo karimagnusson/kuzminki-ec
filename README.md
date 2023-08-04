@@ -106,6 +106,40 @@ See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
 
 Take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for an example of a REST API using this library and [Play](https://github.com/playframework/playframework).
 
+#### In the latest push
+GROUP BY and HAVING
+
+```scala
+sql
+  .select(user)
+  .cols2(t => (
+    t.gender,
+    Agg.avg(t.age)
+  ))
+  .where(_.age > 0)
+  .groupBy(_.gender)
+  .having(_.gender !== "")
+  .orderBy(t => Agg.avg(t.age).desc)
+  .run
+```
+If you wish to cache the query:
+```scala
+val stm = sql
+  .select(user)
+  .cols2(t => (
+    t.gender,
+    Agg.avg(t.age)
+  ))
+  .all
+  .groupBy(_.gender)
+  .having(_.gender !== "")
+  .orderBy(t => Agg.avg(t.age).desc)
+  .pickWhere1(_.gender.use > Arg)
+  .cache
+
+stm.run(0)
+```
+
 #### In the latest version, 0.9.4-RC6
 
 Changes:  

@@ -31,6 +31,7 @@ class DbConfig(val db: String) {
   props.setProperty("dataSource.serverName", "localhost")
   props.setProperty("dataSource.portNumber", "5432")
   props.setProperty("maximumPoolSize", "10")
+  props.setProperty("minimumIdle", "3")
 
   def withUser(value: String) = {
     props.setProperty("dataSource.user", value)
@@ -54,6 +55,11 @@ class DbConfig(val db: String) {
 
   def withPoolSize(value: Int) = {
     props.setProperty("maximumPoolSize", value.toString)
+    this
+  }
+
+  def withMinPoolSize(value: Int) = {
+    props.setProperty("minimumIdle", value.toString)
     this
   }
 

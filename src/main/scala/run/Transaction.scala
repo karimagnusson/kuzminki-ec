@@ -14,12 +14,13 @@
 * limitations under the License.
 */
 
-package kuzminki.render
+package kuzminki.run
 
+import scala.concurrent.ExecutionContext
 import kuzminki.api.Kuzminki
 import kuzminki.render.RenderedOperation
 
 
 class Transaction(stms: Seq[RenderedOperation]) {
-  def run(implicit db: Kuzminki) = db.execList(stms)
+  def run(implicit db: Kuzminki, ec: ExecutionContext) = db.execList(stms)
 }

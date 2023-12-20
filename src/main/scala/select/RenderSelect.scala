@@ -23,6 +23,7 @@ import kuzminki.fn.aggFn.AggFn
 import kuzminki.run.RunQuery
 import kuzminki.shape.RowShapeSingle
 import kuzminki.shape.CachePart.seqConv
+import kuzminki.run.Pages
 import kuzminki.section._
 import kuzminki.render._
 

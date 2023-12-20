@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package kuzminki.select
+package kuzminki.run
 
 import java.sql.SQLException
 import scala.concurrent.{Future, ExecutionContext}
@@ -58,16 +58,14 @@ class Pages[R](query: RenderedQuery[R], limit: Int) {
 
   def getOriginal = new Pages(query, limit)
 
-  def nextOpt(implicit db: Kuzminki) = {
-    implicit val ec: ExecutionContext = db.getEc
+  def nextOpt(implicit db: Kuzminki, ec: ExecutionContext) = {
     next.map {
       case Nil => None
       case rows => Some(rows)
     }
   }
     
-  def next(implicit db: Kuzminki) = {
-    implicit val ec: ExecutionContext = db.getEc
+  def next(implicit db: Kuzminki, ec: ExecutionContext) = {
     if (isDone)
       Future.successful(List.empty[R])
     else
@@ -81,16 +79,14 @@ class Pages[R](query: RenderedQuery[R], limit: Int) {
     new RenderedQuery(pageStatement, args, query.rowConv)
   }
 
-  def pageOpt(num: Int)(implicit db: Kuzminki) = {
-    implicit val ec: ExecutionContext = db.getEc
+  def pageOpt(num: Int)(implicit db: Kuzminki, ec: ExecutionContext) = {
     page(num).map {
       case Nil => None
       case rows => Some(rows)
     }
   }
 
-  def page(num: Int)(implicit db: Kuzminki) = {
-    implicit val ec: ExecutionContext = db.getEc
+  def page(num: Int)(implicit db: Kuzminki, ec: ExecutionContext) = {
     db.query(pageQuery(num))
   }
 }

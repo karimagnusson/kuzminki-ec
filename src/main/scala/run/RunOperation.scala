@@ -16,6 +16,7 @@
 
 package kuzminki.run
 
+import scala.concurrent.ExecutionContext
 import kuzminki.api.Kuzminki
 import kuzminki.shape.ParamConv
 import kuzminki.render.{RenderedOperation, JoinArgs}
@@ -25,10 +26,10 @@ trait RunOperation {
 
   def render: RenderedOperation
 
-  def run(implicit db: Kuzminki) =
+  def run(implicit db: Kuzminki, ec: ExecutionContext) =
     db.exec(render)
 
-  def runNum(implicit db: Kuzminki) =
+  def runNum(implicit db: Kuzminki, ec: ExecutionContext) =
     db.execNum(render)
 }
 
@@ -39,13 +40,13 @@ trait RunOperationParams[P] extends JoinArgs {
 
   def render(params: P): RenderedOperation
 
-  def run(params: P)(implicit db: Kuzminki) =
+  def run(params: P)(implicit db: Kuzminki, ec: ExecutionContext) =
     db.exec(render(params))
 
-  def runNum(params: P)(implicit db: Kuzminki) =
+  def runNum(params: P)(implicit db: Kuzminki, ec: ExecutionContext) =
     db.execNum(render(params))
 
-  def runList(paramList: Seq[P])(implicit db: Kuzminki) =
+  def runList(paramList: Seq[P])(implicit db: Kuzminki, ec: ExecutionContext) =
     db.execList(paramList.map(render(_)))
 }
 

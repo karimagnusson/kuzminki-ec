@@ -16,6 +16,7 @@
 
 package kuzminki.run
 
+import scala.concurrent.ExecutionContext
 import kuzminki.api.Kuzminki
 import kuzminki.render.{RenderedQuery, JoinArgs}
 
@@ -24,22 +25,22 @@ trait RunQuery[R] {
 
   def render: RenderedQuery[R]
 
-  def run(implicit db: Kuzminki) =
+  def run(implicit db: Kuzminki, ec: ExecutionContext) =
     db.query(render)
 
-  def runAs[T](implicit transform: R => T, db: Kuzminki) =
+  def runAs[T](implicit transform: R => T, db: Kuzminki, ec: ExecutionContext) =
     db.queryAs(render, transform)
 
-  def runHead(implicit db: Kuzminki) =
+  def runHead(implicit db: Kuzminki, ec: ExecutionContext) =
     db.queryHead(render)
 
-  def runHeadAs[T](implicit transform: R => T, db: Kuzminki) =
+  def runHeadAs[T](implicit transform: R => T, db: Kuzminki, ec: ExecutionContext) =
     db.queryHeadAs(render, transform)
 
-  def runHeadOpt(implicit db: Kuzminki) =
+  def runHeadOpt(implicit db: Kuzminki, ec: ExecutionContext) =
     db.queryHeadOpt(render)
 
-  def runHeadOptAs[T](implicit transform: R => T, db: Kuzminki) =
+  def runHeadOptAs[T](implicit transform: R => T, db: Kuzminki, ec: ExecutionContext) =
     db.queryHeadOptAs(render, transform)
 }
 
@@ -50,22 +51,22 @@ trait RunQueryParams[P, R] extends JoinArgs {
 
   def render(params: P): RenderedQuery[R]
 
-  def run(params: P)(implicit db: Kuzminki) =
+  def run(params: P)(implicit db: Kuzminki, ec: ExecutionContext) =
     db.query(render(params))
 
-  def runAs[T](params: P)(implicit transform: R => T, db: Kuzminki) =
+  def runAs[T](params: P)(implicit transform: R => T, db: Kuzminki, ec: ExecutionContext) =
     db.queryAs(render(params), transform)
 
-  def runHead(params: P)(implicit db: Kuzminki) =
+  def runHead(params: P)(implicit db: Kuzminki, ec: ExecutionContext) =
     db.queryHead(render(params))
 
-  def runHeadAs[T](params: P)(implicit transform: R => T, db: Kuzminki) =
+  def runHeadAs[T](params: P)(implicit transform: R => T, db: Kuzminki, ec: ExecutionContext) =
     db.queryHeadAs(render(params), transform)
 
-  def runHeadOpt(params: P)(implicit db: Kuzminki) =
+  def runHeadOpt(params: P)(implicit db: Kuzminki, ec: ExecutionContext) =
     db.queryHeadOpt(render(params))
 
-  def runHeadOptAs[T](params: P)(implicit transform: R => T, db: Kuzminki) =
+  def runHeadOptAs[T](params: P)(implicit transform: R => T, db: Kuzminki, ec: ExecutionContext) =
     db.queryHeadOptAs(render(params), transform)
 }
 

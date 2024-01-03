@@ -102,7 +102,7 @@ This version relies only on Scala ExecutionContext.
 This library is also available for ZIO 1, [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
 And for ZIO 2, [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
 
-See full documentation at [https://kuzminki.io/](https://kuzminki.io/)
+See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
 
 Take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for an example of a REST API using this library and [Play](https://github.com/playframework/playframework).
 

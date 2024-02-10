@@ -35,6 +35,10 @@ object Kuzminki {
   def create(conf: DbConfig, dbContext: ExecutionContext): Kuzminki = {
     new DefaultApi(conf, dbContext)
   }
+
+  def createSplit(masterConf: DbConfig, slaveConf: DbConfig, dbContext: ExecutionContext): Kuzminki = {
+    new SplitApi(masterConf, slaveConf, dbContext)
+  }
 }
 
 
@@ -98,6 +102,60 @@ private class DefaultApi(conf: DbConfig, dbContext: ExecutionContext) extends Ku
 
   def close: Future[Unit] = {
     pool.close()
+    Future.successful(())
+  }
+}
+
+
+private class SplitApi(masterConf: DbConfig, slaveConf: DbConfig, dbContext: ExecutionContext) extends Kuzminki {
+
+  val setPool = new JdbcExecutor(
+    new HikariDataSource(new HikariConfig(masterConf.props)),
+    dbContext
+  )
+
+  val getPool = new JdbcExecutor(
+    new HikariDataSource(new HikariConfig(slaveConf.props)),
+    dbContext
+  )
+
+  def router(stm: String) = stm.split(" ").head match {
+    case "SELECT" => getPool
+    case _ => setPool
+  }
+
+  def query[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[List[R]] = {
+    val stm = render
+    router(stm.statement).query(stm)
+  }
+
+  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[List[T]] = 
+    query(render).map(_.map(transform))
+
+  def queryHead[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[R] =
+    query(render).map(_.head)
+
+  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[T] =
+    query(render).map(_.head).map(transform)
+
+  def queryHeadOpt[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[Option[R]] =
+    query(render).map(_.headOption)
+
+  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[Option[T]] =
+    query(render).map(_.headOption.map(transform))
+
+  def exec(render: => RenderedOperation)(implicit ec: ExecutionContext): Future[Unit] =
+    setPool.exec(render)
+
+  def execNum(render: => RenderedOperation)(implicit ec: ExecutionContext): Future[Int] =
+    setPool.execNum(render)
+
+  def execList(stms: Seq[RenderedOperation])(implicit ec: ExecutionContext): Future[Unit] =
+    setPool.execList(stms)
+
+  def close: Future[Unit] = {
+    setPool.close()
+    getPool.close()
     Future.successful(())
   }
 }

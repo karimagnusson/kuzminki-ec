@@ -65,7 +65,7 @@ object Model {
   }
   
   def noCache[M <: Model](implicit tag: ClassTag[M]): M = {
-    tag.runtimeClass.newInstance.asInstanceOf[M]
+    tag.runtimeClass.getDeclaredConstructor().newInstance().asInstanceOf[M]
   }
 }
 

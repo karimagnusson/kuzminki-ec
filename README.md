@@ -6,11 +6,11 @@
 
 The main goal of the latest version 0.9.5-RC2 is to provide support for Scala 3. It also has some import improvements and although it is a release candidate, it should be chosen over 0.9.4.
 
-This library is also available for [ZIO](https://github.com/karimagnusson/kuzminki-zio-2)
-
-This version relies only on Scala ExecutionContext. To add support for streaming data to and from the database with Pekko and Akka streaming, take a look at this library [kuzminki-ec-stream](https://github.com/karimagnusson/kuzminki-ec-stream)
+This version relies only on Scala ExecutionContext and is suitable for use with Pekko and Akka. To add support for streaming data to and from the database with Pekko and Akka streaming, add this library [kuzminki-ec-stream](https://github.com/karimagnusson/kuzminki-ec-stream)
 
 Take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for an example of a REST API using this library and [Play](https://github.com/playframework/playframework).
+
+This library is also available for [ZIO](https://github.com/karimagnusson/kuzminki-zio-2)
 
 See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
 

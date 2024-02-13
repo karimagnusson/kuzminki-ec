@@ -4,10 +4,20 @@
 
 # kuzminki-ec
 
+The main goal of the latest version 0.9.5-RC2 is to provide support for Scala 3. It also has some import improvements and although it is a release candidate, it should be chosen over 0.9.4.
+
+This library is also available for [ZIO](https://github.com/karimagnusson/kuzminki-zio-2)
+
+This version relies only on Scala ExecutionContext. To add support for streaming data to and from the database with Pekko and Akka streaming, take a look at this library [kuzminki-ec-stream](https://github.com/karimagnusson/kuzminki-ec-stream)
+
+Take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for an example of a REST API using this library and [Play](https://github.com/playframework/playframework).
+
+See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
+
 #### Sbt
 ```sbt
-// compiled for Scala 2.13.8
-libraryDependencies += "io.github.karimagnusson" % "kuzminki-ec" % "0.9.4"
+// available for Scala 2.13 and Scala 3
+libraryDependencies += "io.github.karimagnusson" %% "kuzminki-ec" % "0.9.5-RC2"
 ```
 
 This version of the library can be used Akka but does not depend on it.
@@ -15,8 +25,6 @@ This version of the library can be used Akka but does not depend on it.
 #### Example
 ```scala
 import akka.actor._
-import akka.util.Timeout
-import scala.concurrent.Await
 import kuzminki.api._
 
 object ExampleApp extends App {
@@ -34,7 +42,7 @@ object ExampleApp extends App {
   implicit val ec = system.dispatcher
   implicit val db = Kuzminki.create(
     DbConfig.forDb("company"),
-    system.dispatchers.lookup("kuzminki-dispatcher")
+    system.dispatchers.lookup("akka.actor.default-blocking-io-dispatcher")
   )
 
   val job = for {
@@ -65,21 +73,6 @@ object ExampleApp extends App {
     db.close()
     system.terminate()
   }
-
-  Await.result(job, 10.seconds)
-}
-```
-
-#### Dispatcher
-Add a dispatcher to your config. Unless specified, kuzminki-dispatcher will be used.
-```sbt
-kuzminki-dispatcher {
-  type = "Dispatcher"
-  executor = "thread-pool-executor"
-  thread-pool-executor {
-    fixed-pool-size = 10
-  }
-  throughput = 1
 }
 ```
 
@@ -98,13 +91,8 @@ Statements can be cached for better performance and reusability. This means that
 #### Only Postgres
 Kuzminki supports only Postgresql. It could be adapted for use with other databases if there is interest in that. But given that it has support for many postgres specific features, support for another database would require it’s own project rather than a size fits all approach. Therefore, at the moment the goal is to deliver a good library for Postgres. That being said, there are other Postgres compatible databases that work with Kuzminki. For example CockroachDB. For those looking to scale up, it might be a good choice.
 
-This version relies only on Scala ExecutionContext.  
-This library is also available for ZIO 1, [kuzminki-zio](https://github.com/karimagnusson/kuzminki-zio)  
-And for ZIO 2, [kuzminki-zio-2](https://github.com/karimagnusson/kuzminki-zio-2)
 
-See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
 
-Take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for an example of a REST API using this library and [Play](https://github.com/playframework/playframework).
 
 
 

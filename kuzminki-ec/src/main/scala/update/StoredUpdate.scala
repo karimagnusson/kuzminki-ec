@@ -16,14 +16,13 @@
 
 package kuzminki.update
 
+import scala.concurrent.ExecutionContext
+import kuzminki.api.Kuzminki
 import kuzminki.shape.{ParamConv, RowConv}
 import kuzminki.render.{
   RenderedOperation,
-  RenderedQuery
-}
-import kuzminki.run.{
-  RunUpdate,
-  RunUpdateReturning
+  RenderedQuery,
+  JoinArgs
 }
 
 
@@ -32,12 +31,32 @@ class StoredUpdate[P1, P2](
   args: Vector[Any],
   changes: ParamConv[P1],
   filters: ParamConv[P2]
-) extends RunUpdate[P1, P2] {
+) extends JoinArgs {
 
   def render(p1: P1, p2: P2) = RenderedOperation(
     statement,
     joinArgs(args, changes.fromShape(p1) ++ filters.fromShape(p2))
   )
+
+  def run(p1: P1, p2: P2)(implicit db: Kuzminki, ec: ExecutionContext) =
+    db.exec(render(p1, p2))
+
+  def runNum(p1: P1, p2: P2)(implicit db: Kuzminki, ec: ExecutionContext) =
+    db.execNum(render(p1, p2))
+
+  def runList(list: Seq[Tuple2[P1, P2]])(implicit db: Kuzminki, ec: ExecutionContext) =
+    db.execList(list.map(p => render(p._1, p._2)))
+
+  def printSql = {
+    println(statement)
+    this
+  }
+    
+  def printSqlAndArgs(p1: P1, p2: P2) =
+    render(p1, p2).printStatementAndArgs(this)
+    
+  def printSqlWithArgs(p1: P1, p2: P2) =
+    render(p1, p2).printStatementWithArgs(this)
 }
 
 
@@ -47,13 +66,42 @@ class StoredUpdateReturning[P1, P2, R](
   changes: ParamConv[P1],
   filters: ParamConv[P2],
   rowConv: RowConv[R]
-) extends RunUpdateReturning[P1, P2, R] {
+) extends JoinArgs {
 
   def render(p1: P1, p2: P2) = RenderedQuery(
     statement,
     joinArgs(args, changes.fromShape(p1) ++ filters.fromShape(p2)),
     rowConv
   )
+
+  def run(p1: P1, p2: P2)(implicit db: Kuzminki, ec: ExecutionContext) =
+    db.query(render(p1, p2))
+
+  def runAs[T](p1: P1, p2: P2)(implicit transform: R => T, db: Kuzminki, ec: ExecutionContext) =
+    db.queryAs(render(p1, p2), transform)
+
+  def runHead(p1: P1, p2: P2)(implicit db: Kuzminki, ec: ExecutionContext) =
+    db.queryHead(render(p1, p2))
+
+  def runHeadAs[T](p1: P1, p2: P2)(implicit transform: R => T, db: Kuzminki, ec: ExecutionContext) =
+    db.queryHeadAs(render(p1, p2), transform)
+
+  def runHeadOpt(p1: P1, p2: P2)(implicit db: Kuzminki, ec: ExecutionContext) =
+    db.queryHeadOpt(render(p1, p2))
+
+  def runHeadOptAs[T](p1: P1, p2: P2)(implicit transform: R => T, db: Kuzminki, ec: ExecutionContext) =
+    db.queryHeadOptAs(render(p1, p2), transform)
+
+  def printSql = {
+    println(statement)
+    this
+  }
+    
+  def printSqlAndArgs(p1: P1, p2: P2) =
+    render(p1, p2).printStatementAndArgs(this)
+    
+  def printSqlWithArgs(p1: P1, p2: P2) =
+    render(p1, p2).printStatementWithArgs(this)
 }
 
 

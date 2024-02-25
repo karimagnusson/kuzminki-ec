@@ -21,6 +21,9 @@ import java.sql.Date
 import java.sql.Timestamp
 import java.util.UUID
 
+import scala.concurrent.{Future, ExecutionContext}
+import shapeless._
+
 import kuzminki.column._
 import kuzminki.filter._
 import kuzminki.sorting.Sorting
@@ -28,6 +31,7 @@ import kuzminki.assign.Assign
 import kuzminki.update.RenderUpdate
 import kuzminki.delete.RenderDelete
 import kuzminki.insert.{RenderInsert, Values}
+import kuzminki.run._
 import kuzminki.select._
 import kuzminki.render._
 
@@ -86,6 +90,67 @@ package object api extends filters {
   implicit val kzFilterOptToSeq: Option[Filter] => Seq[Option[Filter]] = filterOpt => Seq(filterOpt)
   implicit val kzSortingToSeq: Sorting => Seq[Sorting] = sorting => Seq(sorting)
   implicit val kzAssignToSeq: Assign => Seq[Assign] = assign => Seq(assign)
+
+  // result type
+
+  implicit class RunQueryType[R <: Product, B <: HList](query: RunQuery[R]) {
+
+    def runType[T](
+      implicit untupler: Generic.Aux[R, B],
+               generic: Generic.Aux[T, B],
+               db: Kuzminki,
+               ec: ExecutionContext
+    ): Future[List[T]] = {
+      query.runAs(r => generic.from(untupler.to(r)), db, ec)
+    }
+    
+    def runHeadType[T](
+      implicit untupler: Generic.Aux[R, B],
+               generic: Generic.Aux[T, B],
+               db: Kuzminki,
+               ec: ExecutionContext
+    ): Future[T] = {
+      query.runHeadAs(r => generic.from(untupler.to(r)), db, ec)
+    }
+
+    def runHeadOptType[T](
+      implicit untupler: Generic.Aux[R, B],
+               generic: Generic.Aux[T, B],
+               db: Kuzminki,
+               ec: ExecutionContext
+    ): Future[Option[T]] = {
+      query.runHeadOptAs(r => generic.from(untupler.to(r)), db, ec)
+    }
+  }
+
+  implicit class RunQueryParamsType[P, R <: Product, B <: HList](query: RunQueryParams[P, R]) {
+
+    def runType[T](params: P)(
+      implicit untupler: Generic.Aux[R, B],
+               generic: Generic.Aux[T, B],
+               db: Kuzminki,
+               ec: ExecutionContext
+    ): Future[List[T]] = {
+      query.runAs(params)(r => generic.from(untupler.to(r)), db, ec)
+    }
+
+    def runHeadType[T](params: P)(
+      implicit untupler: Generic.Aux[R, B],
+               generic: Generic.Aux[T, B],
+               db: Kuzminki,
+               ec: ExecutionContext
+    ): Future[T] =
+      query.runHeadAs(params)(r => generic.from(untupler.to(r)), db, ec)
+
+    def runHeadOptType[T](params: P)(
+      implicit untupler: Generic.Aux[R, B],
+               generic: Generic.Aux[T, B],
+               db: Kuzminki,
+               ec: ExecutionContext
+    ): Future[Option[T]] = {
+      query.runHeadOptAs(params)(r => generic.from(untupler.to(r)), db, ec)
+    }
+  }
 
   // raw SQL
 

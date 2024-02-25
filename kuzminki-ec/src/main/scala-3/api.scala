@@ -21,6 +21,10 @@ import java.sql.Date
 import java.sql.Timestamp
 import java.util.UUID
 
+import scala.deriving.Mirror.ProductOf
+import scala.concurrent.{Future, ExecutionContext}
+
+import kuzminki.api.Kuzminki
 import kuzminki.column._
 import kuzminki.filter._
 import kuzminki.sorting.Sorting
@@ -87,6 +91,67 @@ package object api extends filters {
   given kzFilterOptToSeq: Conversion[Option[Filter], Seq[Option[Filter]]] = (x: Option[Filter]) => Seq(x)
   given kzSortingToSeq: Conversion[Sorting, Seq[Sorting]] = (x: Sorting) => Seq(x)
   given kzAssignToSeq: Conversion[Assign, Seq[Assign]] = (x: Assign) => Seq(x)
+
+    // result type
+
+  extension [R <: Product](query: RunQuery[R]) {
+
+    def runType[T](
+      using mirror: ProductOf[T],
+            ev: R <:< mirror.MirroredElemTypes,
+            db: Kuzminki,
+            ec: ExecutionContext
+    ): Future[List[T]] = {
+      query.runAs(mirror.fromProduct(_), db, ec)
+    }
+
+    def runHeadType[T](
+      using mirror: ProductOf[T],
+            ev: R <:< mirror.MirroredElemTypes,
+            db: Kuzminki,
+            ec: ExecutionContext
+    ): Future[T] = {
+      query.runHeadAs(mirror.fromProduct(_), db, ec)
+    }
+
+    def runHeadOptType[T](
+      using mirror: ProductOf[T],
+            ev: R <:< mirror.MirroredElemTypes,
+            db: Kuzminki,
+            ec: ExecutionContext
+    ): Future[Option[T]] = {
+      query.runHeadOptAs(mirror.fromProduct(_), db, ec)
+    }
+  }
+
+  extension [P, R <: Product](query: RunQueryParams[P, R]) {
+
+    def runType[T](params: P)(
+      using mirror: ProductOf[T],
+            ev: R <:< mirror.MirroredElemTypes,
+            db: Kuzminki,
+            ec: ExecutionContext
+    ): Future[List[T]] = {
+      query.runAs(params)(mirror.fromProduct(_), db, ec)
+    }
+
+    def runHeadType[T](params: P)(
+      using mirror: ProductOf[T],
+            ev: R <:< mirror.MirroredElemTypes,
+            db: Kuzminki,
+            ec: ExecutionContext
+    ): Future[T] =
+      query.runHeadAs(params)(mirror.fromProduct(_), db, ec)
+
+    def runHeadOptType[T](params: P)(
+      using mirror: ProductOf[T],
+            ev: R <:< mirror.MirroredElemTypes,
+            db: Kuzminki,
+            ec: ExecutionContext
+    ): Future[Option[T]] = {
+      query.runHeadOptAs(params)(mirror.fromProduct(_), db, ec)
+    }
+  }
 
   // raw SQL
 

@@ -44,15 +44,20 @@ trait Kuzminki {
 
   def query[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[List[R]]
 
-  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[List[T]]
+  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[List[T]] = 
+    query(render).map(_.map(transform))
 
-  def queryHead[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[R]
+  def queryHead[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[R] =
+    query(render).map(_.head)
 
-  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[T]
+  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[T] =
+    query(render).map(_.head).map(transform)
 
-  def queryHeadOpt[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[Option[R]]
+  def queryHeadOpt[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[Option[R]] =
+    query(render).map(_.headOption)
 
-  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[Option[T]]
+  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[Option[T]] =
+    query(render).map(_.headOption.map(transform))
 
   def exec(render: => RenderedOperation)(implicit ec: ExecutionContext): Future[Unit]
 
@@ -71,31 +76,16 @@ private class DefaultApi(conf: DbConfig, dbContext: ExecutionContext) extends Ku
     dbContext
   )
 
-  def query[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[List[R]] =
+  def query[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext) =
     pool.query(render)
 
-  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[List[T]] = 
-    pool.query(render).map(_.map(transform))
-
-  def queryHead[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[R] =
-    pool.query(render).map(_.head)
-
-  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[T] =
-    pool.query(render).map(_.head).map(transform)
-
-  def queryHeadOpt[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[Option[R]] =
-    pool.query(render).map(_.headOption)
-
-  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[Option[T]] =
-    pool.query(render).map(_.headOption.map(transform))
-
-  def exec(render: => RenderedOperation)(implicit ec: ExecutionContext): Future[Unit] =
+  def exec(render: => RenderedOperation)(implicit ec: ExecutionContext) =
     pool.exec(render)
 
-  def execNum(render: => RenderedOperation)(implicit ec: ExecutionContext): Future[Int] =
+  def execNum(render: => RenderedOperation)(implicit ec: ExecutionContext) =
     pool.execNum(render)
 
-  def execList(stms: Seq[RenderedOperation])(implicit ec: ExecutionContext): Future[Unit] =
+  def execList(stms: Seq[RenderedOperation])(implicit ec: ExecutionContext) =
     pool.execList(stms)
 
   def close: Future[Unit] = {
@@ -122,33 +112,18 @@ private class SplitApi(masterConf: DbConfig, slaveConf: DbConfig, dbContext: Exe
     case _ => setPool
   }
 
-  def query[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[List[R]] = {
+  def query[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext) = {
     val stm = render
     router(stm.statement).query(stm)
   }
 
-  def queryAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[List[T]] = 
-    query(render).map(_.map(transform))
-
-  def queryHead[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[R] =
-    query(render).map(_.head)
-
-  def queryHeadAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[T] =
-    query(render).map(_.head).map(transform)
-
-  def queryHeadOpt[R](render: => RenderedQuery[R])(implicit ec: ExecutionContext): Future[Option[R]] =
-    query(render).map(_.headOption)
-
-  def queryHeadOptAs[R, T](render: => RenderedQuery[R], transform: R => T)(implicit ec: ExecutionContext): Future[Option[T]] =
-    query(render).map(_.headOption.map(transform))
-
-  def exec(render: => RenderedOperation)(implicit ec: ExecutionContext): Future[Unit] =
+  def exec(render: => RenderedOperation)(implicit ec: ExecutionContext) =
     setPool.exec(render)
 
-  def execNum(render: => RenderedOperation)(implicit ec: ExecutionContext): Future[Int] =
+  def execNum(render: => RenderedOperation)(implicit ec: ExecutionContext) =
     setPool.execNum(render)
 
-  def execList(stms: Seq[RenderedOperation])(implicit ec: ExecutionContext): Future[Unit] =
+  def execList(stms: Seq[RenderedOperation])(implicit ec: ExecutionContext) =
     setPool.execList(stms)
 
   def close: Future[Unit] = {

@@ -16,14 +16,14 @@
 
 package kuzminki.insert
 
+import scala.concurrent.ExecutionContext
+import kuzminki.api.Kuzminki
 import kuzminki.shape.{ParamConv, RowConv}
+import kuzminki.run.RunQueryParams
 import kuzminki.render.{
   RenderedOperation,
-  RenderedQuery
-}
-import kuzminki.run.{
-  RunQueryParams,
-  RunOperationParams
+  RenderedQuery,
+  JoinArgs
 }
 
 
@@ -31,12 +31,32 @@ class StoredInsert[P](
   val statement: String,
   args: Vector[Any],
   paramConv: ParamConv[P]
-) extends RunOperationParams[P] {
+) extends JoinArgs {
 
   def render(params: P) = RenderedOperation(
     statement,
     joinArgs(args, paramConv.fromShape(params))
   )
+
+  def run(params: P)(implicit db: Kuzminki, ec: ExecutionContext) =
+    db.exec(render(params))
+
+  def runNum(params: P)(implicit db: Kuzminki, ec: ExecutionContext) =
+    db.execNum(render(params))
+
+  def runList(paramList: Seq[P])(implicit db: Kuzminki, ec: ExecutionContext) =
+    db.execList(paramList.map(render(_)))
+
+  def printSql = {
+    println(statement)
+    this
+  }
+  
+  def printSqlAndArgs(params: P) =
+    render(params).printStatementAndArgs(this)
+  
+  def printSqlWithArgs(params: P) =
+    render(params).printStatementWithArgs(this)
 }
 
 

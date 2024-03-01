@@ -6,7 +6,7 @@ import kuzminki.shape._
 import kuzminki.fn.Fn
 
 
-abstract class PickInsertStoredReturning[M <: Model, P](builder: InsertBuilder[M, P]) {
+abstract class PickStoredInsertReturning[M <: Model, P](builder: InsertBuilder[M, P]) {
 
   private def next[R](rowShape: RowShape[R]) = {
     new RenderStoredInsertReturning(

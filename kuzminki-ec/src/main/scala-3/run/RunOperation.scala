@@ -16,7 +16,7 @@
 
 package kuzminki.run
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 import kuzminki.api.Kuzminki
 import kuzminki.render.RenderedOperation
 
@@ -25,11 +25,15 @@ trait RunOperation {
 
   def render: RenderedOperation
 
-  def run(implicit db: Kuzminki, ec: ExecutionContext) =
-    db.exec(render)
+  def run(
+    using db: Kuzminki,
+          ec: ExecutionContext
+  ): Future[Unit] = db.exec(render)
 
-  def runNum(implicit db: Kuzminki, ec: ExecutionContext) =
-    db.execNum(render)
+  def runNum(
+    using db: Kuzminki,
+          ec: ExecutionContext
+  ): Future[Int] = db.execNum(render)
 
   def printSql =
     render.printStatement(this)
@@ -40,7 +44,6 @@ trait RunOperation {
   def printSqlWithArgs =
     render.printStatementWithArgs(this)
 }
-
 
 
 

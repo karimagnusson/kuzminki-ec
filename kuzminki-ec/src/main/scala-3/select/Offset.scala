@@ -14,23 +14,23 @@
 * limitations under the License.
 */
 
-package kuzminki.model
+package kuzminki.select
 
-import scala.reflect.{classTag, ClassTag}
 import scala.deriving.Mirror.ProductOf
-import kuzminki.column.TypeCol
-import kuzminki.shape._
+import kuzminki.api.Kuzminki
+import kuzminki.section.OffsetSec
 
 
-trait ModelWrite {
+class Offset[M, R](model: M, coll: SelectCollector[R]) extends Limit(model, coll) {
 
-  import org.tpolecat.typename.TypeName
-
-  @deprecated("this method will be removed", "0.9.5")
-  inline def write[T](colArgs: TypeCol[_]*)(using p: ProductOf[T], cTag: ClassTag[T]) = {
-    val cols = colArgs.toVector
-    val names = TypeMembers.getTypes[T]
-    RowTypeNames.validate(cols, names)
-    new ParamShapeWrite(cols, cTag)
+  def offset(num: Int) = {
+    new Limit(
+      model,
+      coll.add(
+        OffsetSec(num)
+      )
+    )
   }
+
+  def asPages(size: Int) = Pages(render, size)
 }

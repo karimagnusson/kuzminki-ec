@@ -13,11 +13,7 @@ inThisBuild(List(
   )
 ))
 
-homepage := Some(
-  url("https://github.com/karimagnusson/kuzminki-ec")
-)
-
-ThisBuild / version := "0.9.5-RC4"
+ThisBuild / version := "0.9.5"
 ThisBuild / versionScheme := Some("early-semver")
 
 scalaVersion := "3.3.1"

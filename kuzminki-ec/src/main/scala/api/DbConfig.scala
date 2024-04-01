@@ -53,7 +53,7 @@ class DbConfig(val db: String) {
     this
   }
 
-  def withPoolSize(value: Int) = {
+  def withMaxPoolSize(value: Int) = {
     props.setProperty("maximumPoolSize", value.toString)
     this
   }

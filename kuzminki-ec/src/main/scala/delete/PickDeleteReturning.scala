@@ -16,12 +16,6 @@ abstract class PickDeleteReturning[M](model: M, coll: SectionCollector) {
     )
   }
 
-  def returningType[R](pick: M => RowReader[R]) = {
-    next(
-      pick(model)
-    )
-  }
-
   def returningSeq(pick: M => Seq[TypeCol[_]]) = {
     next(
       new RowShapeSeq(pick(model))

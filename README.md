@@ -14,8 +14,6 @@ This library is also available for [ZIO](https://github.com/karimagnusson/kuzmin
 
 See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
 
-This latest version adds some methods to the API (see at the bottom).
-
 #### Sbt
 ```sbt
 // available for Scala 2.13 and Scala 3

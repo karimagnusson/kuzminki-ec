@@ -6,7 +6,7 @@ Kuzminki is feature-rich query builder and access library for PostgreSQL written
 
 Please report bugs if you find them and feel free to DM me on Twitter if you have any questions.
 
-This version relies only on Scala ExecutionContext and is suitable for use with Pekko and Akka. To add support for streaming data to and from the database with Pekko and Akka streaming, add this library [kuzminki-ec-stream](https://github.com/karimagnusson/kuzminki-ec-stream)
+This version relies only on Scala ExecutionContext and is suitable for use with Pekko. To add support for streaming data to and from the database with Pekko streaming, add this library [kuzminki-pekko](https://github.com/karimagnusson/kuzminki-pekko)
 
 Take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-play-demo) for an example of a REST API using this library and [Play](https://github.com/playframework/playframework).
 

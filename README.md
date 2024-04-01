@@ -24,7 +24,7 @@ libraryDependencies += "io.github.karimagnusson" %% "kuzminki-ec" % "0.9.5"
 
 #### Example
 ```scala
-import akka.actor._
+import org.apache.pekko.actor._
 import kuzminki.api._
 
 object ExampleApp extends App {
@@ -42,7 +42,7 @@ object ExampleApp extends App {
   implicit val ec = system.dispatcher
   implicit val db = Kuzminki.create(
     DbConfig.forDb("company"),
-    system.dispatchers.lookup("akka.actor.default-blocking-io-dispatcher")
+    system.dispatchers.lookup("pekko.actor.default-blocking-io-dispatcher")
   )
 
   val job = for {

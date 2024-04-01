@@ -27,6 +27,13 @@ import kuzminki.api._
 
 object ExampleApp extends App {
 
+  implicit val system = ActorSystem()
+  implicit val ec = system.dispatcher
+  implicit val db = Kuzminki.create(
+    DbConfig.forDb("company"),
+    system.dispatchers.lookup("pekko.actor.default-blocking-io-dispatcher")
+  )
+
   class Client extends Model("client") {
     val id = column[Int]("id")
     val username = column[String]("username")
@@ -35,13 +42,6 @@ object ExampleApp extends App {
   }
 
   val client = Model.get[Client]
-
-  implicit val system = ActorSystem()
-  implicit val ec = system.dispatcher
-  implicit val db = Kuzminki.create(
-    DbConfig.forDb("company"),
-    system.dispatchers.lookup("pekko.actor.default-blocking-io-dispatcher")
-  )
 
   val job = for {
     _ <- sql

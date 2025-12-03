@@ -12,7 +12,7 @@ Take a look at [kuzminki-play-demo](https://github.com/karimagnusson/kuzminki-pl
 
 This library is also available for [ZIO](https://github.com/karimagnusson/kuzminki-zio-2)
 
-See full documentation at [https://kuzminki.info/](https://kuzminki.info/)
+See full documentation at [https://kuzminki.kotturinn.com/](https://kuzminki.kotturinn.com/)
 
 #### Sbt
 ```sbt

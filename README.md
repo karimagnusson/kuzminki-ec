@@ -1,4 +1,4 @@
-[![Twitter URL](https://img.shields.io/twitter/url/https/twitter.com/bukotsunikki.svg?style=social&label=Follow%20%40kuzminki_lib)](https://twitter.com/kuzminki_lib)
+> **Note:** This project has been renamed to [Slinq](https://github.com/karimagnusson/slinq). See the new repository for the latest version.
 
 # Kuzminki
 
@@ -76,22 +76,22 @@ object ExampleApp extends App {
       .cols2(t => (t.username, t.age))
       .values(("Joe", 35))
       .run
-    
+
     _ <- sql
       .update(client)
       .set(_.age ==> 24)
       .where(_.id === 4)
       .run
-    
+
     _ <- sql.delete(client).where(_.id === 7).run
-    
+
     clients <- sql
       .select(client)
       .cols3(_.all)
       .where(_.age > 25)
       .limit(5)
       .run
-    
+
   } yield clients
 
   job.onComplete { _ =>
@@ -104,7 +104,6 @@ object ExampleApp extends App {
 ## Resources
 
 - [Full documentation](https://kuzminki.kotturinn.com/)
-- [Play Framework demo project](https://github.com/karimagnusson/kuzminki-play-demo)
 - [Pekko streaming support](https://github.com/karimagnusson/kuzminki-pekko)
 - [ZIO version](https://github.com/karimagnusson/kuzminki-zio-2)
 
